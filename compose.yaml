@@ -1,0 +1,28 @@
+services:
+    laravel.test:
+        build:
+            context: ./vendor/laravel/sail/runtimes/8.3
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        ports:
+            - '8100:80'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+    mongodb:
+        image: mongo:7
+        ports:
+            - '27017:27017'
+        volumes:
+            - 'sail-mongodb:/data/db'
+        networks:
+            - sail
+networks:
+    sail:
+        driver: bridge 
+volumes:
+    sail-mongodb:
+        driver: local
+
