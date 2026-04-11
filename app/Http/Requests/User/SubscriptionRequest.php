@@ -2,16 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
+use App\Http\Requests\ApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
-final class SubscriptionRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
-        return true;
-    }
+final class SubscriptionRequest extends ApiRequest {
 
     /**
      * @return array<string, mixed>

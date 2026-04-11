@@ -2,17 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
-final class UpdateUserRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
-        return true;
-    }
+final class UpdateUserRequest extends FormRequest {
 
     /**
      * @return array<string, mixed>

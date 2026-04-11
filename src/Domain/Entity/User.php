@@ -8,20 +8,16 @@ use WeatherFlow\Domain\ValueObject\Email;
 use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\UserId;
 
-/**
- * User aggregate root for identity and subscription lists.
- * Weather stations are a separate aggregate ({@see WeatherStation}).
- */
 final class User
 {
     /**
      * @param  list<StationId>  $subscribedStationIds
      */
     public function __construct(
-        private UserId $id,
-        private Email $email,
-        private string $name,
-        private array $subscribedStationIds = [],
+        private readonly UserId $id,
+        private Email           $email,
+        private string          $name,
+        private array           $subscribedStationIds = [],
     ) {
         if ($name === '') {
             throw new \InvalidArgumentException('User name cannot be empty.');

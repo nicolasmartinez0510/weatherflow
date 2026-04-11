@@ -56,6 +56,8 @@ final class MongoUserRepository implements UserRepository
         $this->collection->deleteOne(['_id' => $id->value]);
     }
 
+    // PRIVATE FUNCTIONS
+
     /**
      * @param  BSONDocument|array<string, mixed>  $doc
      */
