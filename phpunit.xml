@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
+         bootstrap="tests/bootstrap.php"
          colors="true"
 >
+    <!-- Domain test strategy: Option A (domain tests per CRUD vertical slice under
+         tests/Unit, co-located with application tests for that aggregate). Use Option B
+         (a dedicated <testsuite name="Domain">) only if the course explicitly requires
+         an isolated Domain suite in phpunit.xml. -->
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
@@ -32,5 +36,6 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Mongo + WEATHERFLOW_TEST_USE_MONGO: set in .env.testing (see .env.example). -->
     </php>
 </phpunit>
