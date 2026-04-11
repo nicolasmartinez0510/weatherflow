@@ -118,6 +118,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | MongoDB (WeatherFlow domain persistence)
+    |--------------------------------------------------------------------------
+    |
+    | Used by infrastructure repositories (e.g. UserRepository). With Laravel Sail,
+    | use mongodb://mongodb:27017 so the app container resolves the mongo service.
+    | From the host (without Docker), use mongodb://127.0.0.1:27017.
+    |
+    */
+
+    'mongodb' => [
+        'uri' => env('MONGODB_URI', 'mongodb://127.0.0.1:27017'),
+        'database' => env('MONGODB_DATABASE', 'weatherflow'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Migration Repository Table
     |--------------------------------------------------------------------------
     |

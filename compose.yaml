@@ -5,6 +5,11 @@ services:
             dockerfile: Dockerfile
             args:
                 WWWGROUP: '${WWWGROUP}'
+        depends_on:
+            - mongodb
+        environment:
+            MONGODB_URI: '${MONGODB_URI:-mongodb://mongodb:27017}'
+            MONGODB_DATABASE: '${MONGODB_DATABASE:-weatherflow}'
         ports:
             - '8100:80'
         volumes:
