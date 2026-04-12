@@ -15,7 +15,6 @@ use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromStationUseCase;
 use WeatherFlow\Application\UseCase\User\UpdateUserUseCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\ValueObject\Email;
-use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class UserUseCasesTest extends TestCase
@@ -108,6 +107,14 @@ final class UserUseCasesTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('At least one of name or email must be provided.');
         $update->execute('u-1', null, null);
+    }
+
+    public function test_update_throws_when_user_missing(): void
+    {
+        $update = new UpdateUserUseCase($this->users);
+
+        $this->expectException(UserNotFoundException::class);
+        $update->execute('missing-user', 'N', null);
     }
 
     public function test_subscribe_throws_when_user_missing(): void
