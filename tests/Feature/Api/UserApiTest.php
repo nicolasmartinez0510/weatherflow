@@ -93,6 +93,15 @@ final class UserApiTest extends TestCase
             ->assertJsonValidationErrors(['name']);
     }
 
+    public function test_store_returns_422_when_email_missing(): void
+    {
+        $this->postJson('/api/users', [
+            'name' => 'Ada',
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
+    }
+
     public function test_patch_returns_422_when_body_empty(): void
     {
         $id = $this->postJson('/api/users', [
@@ -161,5 +170,11 @@ final class UserApiTest extends TestCase
         $this->deleteJson('/api/users/'.$id)->assertNoContent();
 
         $this->getJson('/api/users/'.$id)->assertNotFound();
+    }
+
+    public function test_delete_unknown_user_returns_no_content(): void
+    {
+        $this->deleteJson('/api/users/00000000-0000-0000-0000-000000000088')
+            ->assertNoContent();
     }
 }

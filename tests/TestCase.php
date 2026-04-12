@@ -5,7 +5,9 @@ namespace Tests;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use MongoDB\Client;
 use Tests\Support\InMemoryUserRepository;
+use Tests\Support\InMemoryWeatherStationRepository;
 use WeatherFlow\Domain\Repository\UserRepository;
+use WeatherFlow\Domain\Repository\WeatherStationRepository;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -15,6 +17,7 @@ abstract class TestCase extends BaseTestCase
 
         if ($this->shouldUseMongoForUserRepository()) {
             $this->truncateMongoUsersCollection();
+            $this->truncateMongoStationsCollection();
 
             return;
         }
@@ -23,18 +26,20 @@ abstract class TestCase extends BaseTestCase
             UserRepository::class,
             fn (): InMemoryUserRepository => new InMemoryUserRepository,
         );
+        $this->app->singleton(
+            WeatherStationRepository::class,
+            fn (): InMemoryWeatherStationRepository => new InMemoryWeatherStationRepository,
+        );
     }
 
     /**
-     * When WEATHERFLOW_TEST_USE_MONGO=true, Feature tests use MongoUserRepository.
-     * Prefer MONGODB_URI / MONGODB_DATABASE / this flag in `.env.testing` (merged via tests/bootstrap.php).
+     * Cuando `config('weatherflow.testing.use_mongo')` es true, los Feature tests usan
+     * MongoUserRepository + MongoWeatherStationRepository. Origen: `WEATHERFLOW_TEST_USE_MONGO`
+     * en `.env.testing` (merge en `tests/bootstrap.php`).
      */
     private function shouldUseMongoForUserRepository(): bool
     {
-        return filter_var(
-            env('WEATHERFLOW_TEST_USE_MONGO', false),
-            FILTER_VALIDATE_BOOL,
-        );
+        return (bool) config('weatherflow.testing.use_mongo');
     }
 
     private function truncateMongoUsersCollection(): void
@@ -42,5 +47,12 @@ abstract class TestCase extends BaseTestCase
         $client = $this->app->make(Client::class);
         $database = (string) config('database.mongodb.database');
         $client->selectDatabase($database)->selectCollection('users')->deleteMany([]);
+    }
+
+    private function truncateMongoStationsCollection(): void
+    {
+        $client = $this->app->make(Client::class);
+        $database = (string) config('database.mongodb.database');
+        $client->selectDatabase($database)->selectCollection('stations')->deleteMany([]);
     }
 }

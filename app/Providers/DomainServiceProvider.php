@@ -5,7 +5,9 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use MongoDB\Client;
 use WeatherFlow\Domain\Repository\UserRepository;
+use WeatherFlow\Domain\Repository\WeatherStationRepository;
 use WeatherFlow\Infrastructure\Persistence\Mongo\MongoUserRepository;
+use WeatherFlow\Infrastructure\Persistence\Mongo\MongoWeatherStationRepository;
 
 /**
  * Binds domain ports to infrastructure adapters (repositories, gateways, etc.).
@@ -22,6 +24,13 @@ class DomainServiceProvider extends ServiceProvider
 
         $this->app->singleton(UserRepository::class, function ($app): UserRepository {
             return new MongoUserRepository(
+                $app->make(Client::class),
+                (string) config('database.mongodb.database'),
+            );
+        });
+
+        $this->app->singleton(WeatherStationRepository::class, function ($app): WeatherStationRepository {
+            return new MongoWeatherStationRepository(
                 $app->make(Client::class),
                 (string) config('database.mongodb.database'),
             );
