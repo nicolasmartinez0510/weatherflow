@@ -18,7 +18,7 @@ final readonly class GetWeatherStationUseCase
     {
         $station = $this->stations->findById(new StationId($id));
         if ($station === null) {
-            throw new StationNotFoundException('Station not found.');
+            throw new StationNotFoundException();
         }
 
         return StationResponse::fromEntity($station);

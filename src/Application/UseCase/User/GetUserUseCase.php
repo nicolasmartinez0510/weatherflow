@@ -19,7 +19,7 @@ final readonly class GetUserUseCase
     {
         $user = $this->users->findById(new UserId($id));
         if ($user === null) {
-            throw new UserNotFoundException('User not found.');
+            throw new UserNotFoundException();
         }
 
         return UserResponse::fromEntity($user);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use WeatherFlow\Domain\ValueObject\Email;
 
@@ -11,7 +12,7 @@ final class EmailTest extends TestCase
 {
     public function test_empty_string_throws(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Email cannot be empty.');
 
         new Email('');
@@ -19,7 +20,7 @@ final class EmailTest extends TestCase
 
     public function test_whitespace_only_throws(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Email cannot be empty.');
 
         new Email('   ');
@@ -27,7 +28,7 @@ final class EmailTest extends TestCase
 
     public function test_invalid_format_throws(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid email format.');
 
         new Email('not-an-email');

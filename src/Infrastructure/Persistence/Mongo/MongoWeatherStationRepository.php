@@ -18,13 +18,11 @@ final class MongoWeatherStationRepository implements WeatherStationRepository
 {
     private Collection $collection;
 
-    public function __construct(Client $client, string $databaseName, string $collectionName = 'stations')
-    {
+    public function __construct(Client $client, string $databaseName, string $collectionName = 'stations') {
         $this->collection = $client->selectDatabase($databaseName)->selectCollection($collectionName);
     }
 
-    public function save(WeatherStation $station): void
-    {
+    public function save(WeatherStation $station): void {
         $coords = $station->coordinates();
         $doc = [
             '_id' => $station->id()->value,
@@ -43,8 +41,7 @@ final class MongoWeatherStationRepository implements WeatherStationRepository
         );
     }
 
-    public function findById(StationId $id): ?WeatherStation
-    {
+    public function findById(StationId $id): ?WeatherStation {
         $doc = $this->collection->findOne(['_id' => $id->value]);
         if ($doc === null) {
             return null;
@@ -53,8 +50,7 @@ final class MongoWeatherStationRepository implements WeatherStationRepository
         return $this->mapDocumentToStation($doc);
     }
 
-    public function delete(StationId $id): void
-    {
+    public function delete(StationId $id): void {
         $this->collection->deleteOne(['_id' => $id->value]);
     }
 
@@ -63,8 +59,7 @@ final class MongoWeatherStationRepository implements WeatherStationRepository
     /**
      * @param  BSONDocument|array<string, mixed>  $doc
      */
-    private function mapDocumentToStation(array|object $doc): WeatherStation
-    {
+    private function mapDocumentToStation(array|object $doc): WeatherStation {
         $data = $this->documentToArray($doc);
 
         $statusRaw = (string) ($data['status'] ?? 'active');
@@ -84,8 +79,7 @@ final class MongoWeatherStationRepository implements WeatherStationRepository
      * @param  BSONDocument|array<string, mixed>  $doc
      * @return array<string, mixed>
      */
-    private function documentToArray(array|object $doc): array
-    {
+    private function documentToArray(array|object $doc): array {
         if (is_array($doc)) {
             return $doc;
         }

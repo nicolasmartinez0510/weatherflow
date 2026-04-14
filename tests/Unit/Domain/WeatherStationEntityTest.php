@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use WeatherFlow\Domain\Entity\WeatherStation;
 use WeatherFlow\Domain\ValueObject\Coordinates;
@@ -15,7 +16,7 @@ final class WeatherStationEntityTest extends TestCase
 {
     public function test_empty_name_throws(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Station name cannot be empty.');
 
         new WeatherStation(
@@ -30,7 +31,7 @@ final class WeatherStationEntityTest extends TestCase
 
     public function test_empty_sensor_model_throws(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Sensor model cannot be empty.');
 
         new WeatherStation(
@@ -87,7 +88,7 @@ final class WeatherStationEntityTest extends TestCase
             new UserId('user-1'),
         );
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Station name cannot be empty.');
         $station->rename('');
     }
@@ -103,7 +104,7 @@ final class WeatherStationEntityTest extends TestCase
             new UserId('user-1'),
         );
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Sensor model cannot be empty.');
         $station->changeSensorModel('');
     }

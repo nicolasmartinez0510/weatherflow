@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\InMemoryUserRepository;
 use WeatherFlow\Application\Exception\UserNotFoundException;
@@ -104,7 +105,7 @@ final class UserUseCasesTest extends TestCase
 
         $update = new UpdateUserUseCase($this->users);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('At least one of name or email must be provided.');
         $update->execute('u-1', null, null);
     }

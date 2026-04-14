@@ -9,6 +9,7 @@ use App\Http\Requests\Station\StoreWeatherStationRequest;
 use App\Http\Requests\Station\UpdateWeatherStationRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use InvalidArgumentException;
 use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\Station\CreateWeatherStationUseCase;
@@ -78,7 +79,7 @@ final class WeatherStationController extends Controller
             );
         } catch (StationNotFoundException) {
             return response()->json(['message' => 'Station not found.'], Response::HTTP_NOT_FOUND);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 

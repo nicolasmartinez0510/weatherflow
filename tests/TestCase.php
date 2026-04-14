@@ -4,8 +4,10 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use MongoDB\Client;
+use Tests\Support\InMemoryMeasurementRepository;
 use Tests\Support\InMemoryUserRepository;
 use Tests\Support\InMemoryWeatherStationRepository;
+use WeatherFlow\Domain\Repository\MeasurementRepository;
 use WeatherFlow\Domain\Repository\UserRepository;
 use WeatherFlow\Domain\Repository\WeatherStationRepository;
 
@@ -18,6 +20,7 @@ abstract class TestCase extends BaseTestCase
         if ($this->shouldUseMongoForUserRepository()) {
             $this->truncateMongoUsersCollection();
             $this->truncateMongoStationsCollection();
+            $this->truncateMongoMeasurementsCollection();
 
             return;
         }
@@ -29,6 +32,10 @@ abstract class TestCase extends BaseTestCase
         $this->app->singleton(
             WeatherStationRepository::class,
             fn (): InMemoryWeatherStationRepository => new InMemoryWeatherStationRepository,
+        );
+        $this->app->singleton(
+            MeasurementRepository::class,
+            fn (): InMemoryMeasurementRepository => new InMemoryMeasurementRepository,
         );
     }
 
@@ -54,5 +61,12 @@ abstract class TestCase extends BaseTestCase
         $client = $this->app->make(Client::class);
         $database = (string) config('database.mongodb.database');
         $client->selectDatabase($database)->selectCollection('stations')->deleteMany([]);
+    }
+
+    private function truncateMongoMeasurementsCollection(): void
+    {
+        $client = $this->app->make(Client::class);
+        $database = (string) config('database.mongodb.database');
+        $client->selectDatabase($database)->selectCollection('measurements')->deleteMany([]);
     }
 }

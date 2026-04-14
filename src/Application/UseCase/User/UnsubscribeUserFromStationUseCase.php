@@ -20,7 +20,7 @@ final readonly class UnsubscribeUserFromStationUseCase
     {
         $user = $this->users->findById(new UserId($userId));
         if ($user === null) {
-            throw new UserNotFoundException('User not found.');
+            throw new UserNotFoundException();
         }
 
         $user->unsubscribeFromStation(new StationId($stationId));

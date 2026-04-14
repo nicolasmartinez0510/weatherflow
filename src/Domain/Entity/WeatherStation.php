@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WeatherFlow\Domain\Entity;
 
+use InvalidArgumentException;
 use WeatherFlow\Domain\ValueObject\Coordinates;
 use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\StationStatus;
@@ -20,10 +21,10 @@ final class WeatherStation
         private readonly UserId $ownerId,
     ) {
         if ($name === '') {
-            throw new \InvalidArgumentException('Station name cannot be empty.');
+            throw new InvalidArgumentException('Station name cannot be empty.');
         }
         if ($sensorModel === '') {
-            throw new \InvalidArgumentException('Sensor model cannot be empty.');
+            throw new InvalidArgumentException('Sensor model cannot be empty.');
         }
     }
 
@@ -60,7 +61,7 @@ final class WeatherStation
     public function rename(string $name): void
     {
         if ($name === '') {
-            throw new \InvalidArgumentException('Station name cannot be empty.');
+            throw new InvalidArgumentException('Station name cannot be empty.');
         }
         $this->name = $name;
     }
@@ -73,7 +74,7 @@ final class WeatherStation
     public function changeSensorModel(string $sensorModel): void
     {
         if ($sensorModel === '') {
-            throw new \InvalidArgumentException('Sensor model cannot be empty.');
+            throw new InvalidArgumentException('Sensor model cannot be empty.');
         }
         $this->sensorModel = $sensorModel;
     }

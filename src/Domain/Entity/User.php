@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WeatherFlow\Domain\Entity;
 
+use InvalidArgumentException;
 use WeatherFlow\Domain\ValueObject\Email;
 use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\UserId;
@@ -20,7 +21,7 @@ final class User
         private array           $subscribedStationIds = [],
     ) {
         if ($name === '') {
-            throw new \InvalidArgumentException('User name cannot be empty.');
+            throw new InvalidArgumentException('User name cannot be empty.');
         }
     }
 
@@ -50,7 +51,7 @@ final class User
     public function rename(string $name): void
     {
         if ($name === '') {
-            throw new \InvalidArgumentException('User name cannot be empty.');
+            throw new InvalidArgumentException('User name cannot be empty.');
         }
         $this->name = $name;
     }
