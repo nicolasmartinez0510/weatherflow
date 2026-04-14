@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WeatherFlow\Application\Exception;
 
-final class UserNotFoundException extends \RuntimeException
-{
+final class UserNotFoundException extends WeatherflowException {
+    protected $message = 'User not found.';
+
 }

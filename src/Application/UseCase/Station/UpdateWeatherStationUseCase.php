@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace WeatherFlow\Application\UseCase\Station;
 
+use InvalidArgumentException;
 use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Domain\Repository\WeatherStationRepository;
 use WeatherFlow\Domain\ValueObject\Coordinates;
@@ -25,16 +26,16 @@ final readonly class UpdateWeatherStationUseCase
         ?StationStatus $status,
     ): StationResponse {
         if ($name === null && $latitude === null && $longitude === null && $sensorModel === null && $status === null) {
-            throw new \InvalidArgumentException('At least one field must be provided.');
+            throw new InvalidArgumentException('At least one field must be provided.');
         }
 
         if (($latitude === null) !== ($longitude === null)) {
-            throw new \InvalidArgumentException('Latitude and longitude must be updated together.');
+            throw new InvalidArgumentException('Latitude and longitude must be updated together.');
         }
 
         $station = $this->stations->findById(new StationId($id));
         if ($station === null) {
-            throw new StationNotFoundException('Station not found.');
+            throw new StationNotFoundException();
         }
 
         if ($name !== null) {

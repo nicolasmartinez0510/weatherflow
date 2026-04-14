@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace WeatherFlow\Domain\ValueObject;
 
+use InvalidArgumentException;
+
 final readonly class Email
 {
     public string $value;
@@ -13,10 +15,10 @@ final readonly class Email
     ) {
         $trimmed = trim($value);
         if ($trimmed === '') {
-            throw new \InvalidArgumentException('Email cannot be empty.');
+            throw new InvalidArgumentException('Email cannot be empty.');
         }
         if (filter_var($trimmed, FILTER_VALIDATE_EMAIL) === false) {
-            throw new \InvalidArgumentException('Invalid email format.');
+            throw new InvalidArgumentException('Invalid email format.');
         }
         $this->value = $trimmed;
     }

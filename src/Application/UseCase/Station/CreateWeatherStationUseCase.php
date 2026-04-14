@@ -30,7 +30,7 @@ final readonly class CreateWeatherStationUseCase
         StationStatus $status,
     ): StationResponse {
         if ($this->users->findById(new UserId($ownerId)) === null) {
-            throw new UserNotFoundException('User not found.');
+            throw new UserNotFoundException();
         }
 
         $station = new WeatherStation(

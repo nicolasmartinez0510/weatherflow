@@ -20,7 +20,7 @@ final readonly class SubscribeUserToStationUseCase
     {
         $user = $this->users->findById(new UserId($userId));
         if ($user === null) {
-            throw new UserNotFoundException('User not found.');
+            throw new UserNotFoundException();
         }
 
         $user->subscribeToStation(new StationId($stationId));

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\InMemoryUserRepository;
 use Tests\Support\InMemoryWeatherStationRepository;
@@ -164,7 +165,7 @@ final class WeatherStationUseCasesTest extends TestCase
 
         $update = new UpdateWeatherStationUseCase($this->stations);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Latitude and longitude must be updated together.');
         $update->execute('st-1', null, 1.0, null, null, null);
     }
@@ -182,7 +183,7 @@ final class WeatherStationUseCasesTest extends TestCase
 
         $update = new UpdateWeatherStationUseCase($this->stations);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('At least one field must be provided.');
         $update->execute('st-1', null, null, null, null, null);
     }

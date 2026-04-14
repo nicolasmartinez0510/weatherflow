@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Domain;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\ValueObject\Email;
@@ -14,7 +15,7 @@ final class UserEntityTest extends TestCase
 {
     public function test_empty_name_throws(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('User name cannot be empty.');
 
         new User(
@@ -28,7 +29,7 @@ final class UserEntityTest extends TestCase
     {
         $user = new User(new UserId('user-1'), new Email('a@b.com'), 'Ada');
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $user->rename('');
     }
 
