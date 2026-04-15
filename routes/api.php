@@ -21,6 +21,7 @@ Route::delete('/stations/{id}', [WeatherStationController::class, 'destroy']);
 
 Route::get('/stations/{stationId}/measurements', [MeasurementController::class, 'indexByStation']);
 Route::post('/measurements', [MeasurementController::class, 'store']);
+Route::get('/measurements', [MeasurementController::class, 'index']);
 Route::get('/measurements/{id}', [MeasurementController::class, 'show']);
 Route::patch('/measurements/{id}', [MeasurementController::class, 'update']);
 Route::delete('/measurements/{id}', [MeasurementController::class, 'destroy']);

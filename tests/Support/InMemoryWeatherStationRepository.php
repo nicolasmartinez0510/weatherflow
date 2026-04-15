@@ -6,6 +6,7 @@ namespace Tests\Support;
 
 use WeatherFlow\Domain\Entity\WeatherStation;
 use WeatherFlow\Domain\Repository\WeatherStationRepository;
+use WeatherFlow\Domain\ValueObject\Id;
 use WeatherFlow\Domain\ValueObject\StationId;
 
 final class InMemoryWeatherStationRepository implements WeatherStationRepository
@@ -18,12 +19,12 @@ final class InMemoryWeatherStationRepository implements WeatherStationRepository
         $this->stations[$station->id()->value] = $station;
     }
 
-    public function findById(StationId $id): ?WeatherStation
+    public function findById(Id $id): ?WeatherStation
     {
         return $this->stations[$id->value] ?? null;
     }
 
-    public function delete(StationId $id): void
+    public function delete(Id $id): void
     {
         unset($this->stations[$id->value]);
     }

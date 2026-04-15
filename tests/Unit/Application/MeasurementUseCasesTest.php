@@ -15,6 +15,7 @@ use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\UseCase\Measurement\CreateMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\DeleteMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\GetMeasurementUseCase;
+use WeatherFlow\Application\UseCase\Measurement\ListMeasurementHistoryUseCase;
 use WeatherFlow\Application\UseCase\Measurement\ListMeasurementsByStationUseCase;
 use WeatherFlow\Application\UseCase\Measurement\UpdateMeasurementUseCase;
 use WeatherFlow\Domain\Entity\User;
@@ -41,7 +42,7 @@ final class MeasurementUseCasesTest extends TestCase
         parent::setUp();
         $this->users = new InMemoryUserRepository;
         $this->stations = new InMemoryWeatherStationRepository;
-        $this->measurements = new InMemoryMeasurementRepository;
+        $this->measurements = new InMemoryMeasurementRepository($this->stations);
         $this->alertEvaluator = new MeasurementAlertEvaluator;
     }
 
@@ -174,7 +175,41 @@ final class MeasurementUseCasesTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    private function seedOwnerAndStation(string $stationId): void
+    public function test_history_filters_by_station_name_temperature_and_alert_only(): void
+    {
+        $this->seedOwnerAndStation('s-north', 'Northern Station');
+        $this->seedOwnerAndStation('s-south', 'Southern Station');
+
+        $create = new CreateMeasurementUseCase($this->stations, $this->measurements, $this->alertEvaluator);
+        $create->execute('s-north', 22.0, 50.0, 1000.0, new DateTimeImmutable('2026-01-01T10:00:00+00:00'));
+        $create->execute('s-north', 41.0, 50.0, 1000.0, new DateTimeImmutable('2026-01-02T10:00:00+00:00'));
+        $create->execute('s-south', 41.0, 50.0, 1000.0, new DateTimeImmutable('2026-01-03T10:00:00+00:00'));
+
+        $history = new ListMeasurementHistoryUseCase($this->measurements);
+        $items = $history->execute('north', 30.0, 45.0, true);
+
+        $this->assertCount(1, $items);
+        $this->assertSame('s-north', $items[0]->stationId);
+        $this->assertSame(41.0, $items[0]->temperature);
+        $this->assertTrue($items[0]->alert);
+    }
+
+    public function test_history_without_filters_returns_all_newest_first(): void
+    {
+        $this->seedOwnerAndStation('s-all', 'All Station');
+        $create = new CreateMeasurementUseCase($this->stations, $this->measurements, $this->alertEvaluator);
+        $create->execute('s-all', 20.0, 50.0, 1000.0, new DateTimeImmutable('2026-01-01T10:00:00+00:00'));
+        $create->execute('s-all', 30.0, 50.0, 1000.0, new DateTimeImmutable('2026-01-02T10:00:00+00:00'));
+
+        $history = new ListMeasurementHistoryUseCase($this->measurements);
+        $items = $history->execute(null, null, null, false);
+
+        $this->assertCount(2, $items);
+        $this->assertSame(30.0, $items[0]->temperature);
+        $this->assertSame(20.0, $items[1]->temperature);
+    }
+
+    private function seedOwnerAndStation(string $stationId, string $stationName = 'S'): void
     {
         $this->users->save(new User(
             new UserId('owner-1'),
@@ -184,7 +219,7 @@ final class MeasurementUseCasesTest extends TestCase
 
         $this->stations->save(new WeatherStation(
             new StationId($stationId),
-            'S',
+            $stationName,
             new Coordinates(0.0, 0.0),
             'DHT22',
             StationStatus::Active,

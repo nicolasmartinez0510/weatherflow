@@ -11,80 +11,129 @@ use MongoDB\Client;
 use MongoDB\Collection;
 use MongoDB\Model\BSONDocument;
 use WeatherFlow\Domain\Entity\Measurement;
+use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\Repository\MeasurementRepository;
 use WeatherFlow\Domain\ValueObject\Humidity;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
 use WeatherFlow\Domain\ValueObject\StationId;
 
-final class MongoMeasurementRepository implements MeasurementRepository
+/**
+ * @extends MongoPersistence<Measurement, MeasurementId>
+ */
+final class MongoMeasurementRepository extends MongoPersistence
+    implements MeasurementRepository
 {
-    private Collection $collection;
+    private Collection $stations;
 
     public function __construct(Client $client, string $databaseName, string $collectionName = 'measurements') {
-        $this->collection = $client->selectDatabase($databaseName)->selectCollection($collectionName);
-    }
+        parent::__construct($client, $databaseName, $collectionName);
+        $this->stations = $this->database->selectCollection('stations');
 
-    public function save(Measurement $measurement): void {
-        $doc = [
-            '_id' => $measurement->id()->value,
-            'stationId' => $measurement->stationId()->value,
-            'temperatureCelsius' => $measurement->temperatureCelsius(),
-            'humidityPercent' => $measurement->humidity()->percent,
-            'pressureHpa' => $measurement->pressureHpa(),
-            'reportedAt' => $measurement->reportedAt()->format(DateTimeInterface::ATOM),
-            'alert' => $measurement->alert(),
-            'alertType' => $measurement->alertType(),
-        ];
+        $this->collection->createIndex(['stationId' => 1, 'reportedAt' => -1]);
+        $this->collection->createIndex(['temperatureCelsius' => 1, 'reportedAt' => -1]);
+        $this->collection->createIndex(['alert' => 1, 'reportedAt' => -1]);
 
-        $this->collection->replaceOne(
-            ['_id' => $measurement->id()->value],
-            $doc,
-            ['upsert' => true],
-        );
-    }
-
-    /**
-     * @throws DateMalformedStringException
-     */
-    public function findById(MeasurementId $id): ?Measurement {
-        $doc = $this->collection->findOne(['_id' => $id->value]);
-        if ($doc === null) {
-            return null;
-        }
-
-        return $this->mapDocumentToMeasurement($doc);
+        $this->stations->createIndex(['name' => 1]);
     }
 
     /**
      * @throws DateMalformedStringException
      */
     public function findByStationId(StationId $stationId): array {
-        $cursor = $this->collection->find(
+        $mesurementDocs = $this->collection->find(
             ['stationId' => $stationId->value],
             [
                 'sort' => ['reportedAt' => -1],
             ],
         );
 
-        $out = [];
-        foreach ($cursor as $doc) {
-            $out[] = $this->mapDocumentToMeasurement($doc);
+        return $this->mapDocumentsToMesurements($mesurementDocs);
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function findHistory(
+        ?string $stationName,
+        ?float $minTemperature,
+        ?float $maxTemperature,
+        bool $alertsOnly,
+    ): array {
+        $pipeline = [];
+
+        $match = [];
+        if ($alertsOnly) {
+            $match['alert'] = true;
+        }
+        if ($minTemperature !== null || $maxTemperature !== null) {
+            $match['temperatureCelsius'] = [];
+            if ($minTemperature !== null) {
+                $match['temperatureCelsius']['$gte'] = $minTemperature;
+            }
+            if ($maxTemperature !== null) {
+                $match['temperatureCelsius']['$lte'] = $maxTemperature;
+            }
+        }
+        if ($match !== []) {
+            $pipeline[] = ['$match' => $match];
         }
 
-        return $out;
+        if ($stationName !== null && trim($stationName) !== '') {
+            $pipeline[] = [
+                '$lookup' => [
+                    'from' => 'stations',
+                    'localField' => 'stationId',
+                    'foreignField' => '_id',
+                    'as' => 'station',
+                ],
+            ];
+            $pipeline[] = ['$unwind' => '$station'];
+            $pipeline[] = [
+                '$match' => [
+                    'station.name' => [
+                        '$regex' => preg_quote(trim($stationName), '/'),
+                        '$options' => 'i',
+                    ],
+                ],
+            ];
+        }
+
+        $pipeline[] = ['$sort' => ['reportedAt' => -1]];
+
+        $mesurementDocs = $this->collection->aggregate($pipeline);
+
+        return $this->mapDocumentsToMesurements($mesurementDocs);
     }
 
-    public function delete(MeasurementId $id): void {
-        $this->collection->deleteOne(['_id' => $id->value]);
+    protected function getDocByEntity(Measurement|WeatherflowEntity $entity): array|object {
+        return [
+            '_id' => $entity->id()->value,
+            'stationId' => $entity->stationId()->value,
+            'temperatureCelsius' => $entity->temperatureCelsius(),
+            'humidityPercent' => $entity->humidity()->percent,
+            'pressureHpa' => $entity->pressureHpa(),
+            'reportedAt' => $entity->reportedAt()->format(DateTimeInterface::ATOM),
+            'alert' => $entity->alert(),
+            'alertType' => $entity->alertType(),
+        ];
     }
 
-    // PRIVATE FUNCTIONS
+    /**
+     * @throws DateMalformedStringException
+     */
+    private function mapDocumentsToMesurements($mesurementDocs): array {
+        $mesurements = [];
+        foreach ($mesurementDocs as $doc) {
+            $mesurements[] = $this->mapDocumentToEntity($doc);
+        }
+        return $mesurements;
+    }
 
     /**
      * @param BSONDocument|array<string, mixed> $doc
      * @throws DateMalformedStringException
      */
-    private function mapDocumentToMeasurement(array|object $doc): Measurement {
+    protected function mapDocumentToEntity(array|object $doc): Measurement {
         $data = $this->documentToArray($doc);
 
         $reportedRaw = (string) ($data['reportedAt'] ?? '');

@@ -6,7 +6,7 @@ namespace WeatherFlow\Domain\ValueObject;
 
 use InvalidArgumentException;
 
-final readonly class StationId
+final readonly class StationId implements Id
 {
     public function __construct(
         public string $value,

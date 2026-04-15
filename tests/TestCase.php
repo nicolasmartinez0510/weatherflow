@@ -35,7 +35,9 @@ abstract class TestCase extends BaseTestCase
         );
         $this->app->singleton(
             MeasurementRepository::class,
-            fn (): InMemoryMeasurementRepository => new InMemoryMeasurementRepository,
+            fn ($app): InMemoryMeasurementRepository => new InMemoryMeasurementRepository(
+                $app->make(WeatherStationRepository::class),
+            ),
         );
     }
 
