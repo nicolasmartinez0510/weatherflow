@@ -9,7 +9,7 @@ use WeatherFlow\Domain\ValueObject\Email;
 use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\UserId;
 
-final class User
+final class User implements WeatherflowEntity
 {
     /**
      * @param  list<StationId>  $subscribedStationIds

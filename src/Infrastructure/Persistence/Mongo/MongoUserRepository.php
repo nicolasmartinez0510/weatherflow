@@ -5,60 +5,41 @@ declare(strict_types=1);
 namespace WeatherFlow\Infrastructure\Persistence\Mongo;
 
 use MongoDB\Client;
-use MongoDB\Collection;
 use MongoDB\Model\BSONDocument;
 use Traversable;
 use WeatherFlow\Domain\Entity\User;
+use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\Repository\UserRepository;
 use WeatherFlow\Domain\ValueObject\Email;
 use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\UserId;
 
-final class MongoUserRepository implements UserRepository
-{
-    private Collection $collection;
+/**
+ * @extends MongoPersistence<User, UserId>
+ */
+final class MongoUserRepository  extends MongoPersistence implements UserRepository {
 
     public function __construct(Client $client, string $databaseName, string $collectionName = 'users') {
-        $this->collection = $client->selectDatabase($databaseName)->selectCollection($collectionName);
+        parent::__construct($client, $databaseName, $collectionName);
     }
 
-    public function save(User $user): void {
-        $doc = [
-            '_id' => $user->id()->value,
-            'email' => $user->email()->value,
-            'name' => $user->name(),
+    protected function getDocByEntity(User|WeatherflowEntity $entity): array|object {
+        return [
+            '_id' =>  $entity->id()->value,
+            'email' => $entity->email()->value,
+            'name' => $entity->name(),
             'subscribedStationIds' => array_map(
                 static fn (StationId $id): string => $id->value,
-                $user->subscribedStationIds(),
+                $entity->subscribedStationIds(),
             ),
         ];
 
-        $this->collection->replaceOne(
-            ['_id' => $user->id()->value],
-            $doc,
-            ['upsert' => true],
-        );
     }
-
-    public function findById(UserId $id): ?User {
-        $doc = $this->collection->findOne(['_id' => $id->value]);
-        if ($doc === null) {
-            return null;
-        }
-
-        return $this->mapDocumentToUser($doc);
-    }
-
-    public function delete(UserId $id): void {
-        $this->collection->deleteOne(['_id' => $id->value]);
-    }
-
-    // PRIVATE FUNCTIONS
 
     /**
      * @param  BSONDocument|array<string, mixed>  $doc
      */
-    private function mapDocumentToUser(array|object $doc): User {
+    protected function mapDocumentToEntity(array|object $doc): User {
         $data = $this->documentToArray($doc);
 
         $stationRaw = $data['subscribedStationIds'] ?? [];

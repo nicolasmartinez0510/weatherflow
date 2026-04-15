@@ -10,7 +10,7 @@ use WeatherFlow\Domain\ValueObject\Humidity;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
 use WeatherFlow\Domain\ValueObject\StationId;
 
-final class Measurement
+final class Measurement implements WeatherflowEntity
 {
     public function __construct(
         private readonly MeasurementId $id,

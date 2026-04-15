@@ -10,7 +10,7 @@ use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\StationStatus;
 use WeatherFlow\Domain\ValueObject\UserId;
 
-final class WeatherStation
+final class WeatherStation implements WeatherflowEntity
 {
     public function __construct(
         private readonly StationId $id,

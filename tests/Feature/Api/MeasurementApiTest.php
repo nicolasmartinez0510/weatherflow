@@ -296,4 +296,94 @@ final class MeasurementApiTest extends TestCase
         $this->deleteJson('/api/measurements/00000000-0000-0000-0000-000000000099')
             ->assertNoContent();
     }
+
+    public function test_history_filters_by_station_name(): void
+    {
+        $ownerId = $this->postJson('/api/users', [
+            'email' => 'history-name@example.com',
+            'name' => 'HN',
+        ])->json('id');
+
+        $northStation = $this->postJson('/api/stations', [
+            'owner_id' => $ownerId,
+            'name' => 'North Base',
+            'latitude' => 0.0,
+            'longitude' => 0.0,
+            'sensor_model' => 'X',
+        ])->json('id');
+
+        $southStation = $this->postJson('/api/stations', [
+            'owner_id' => $ownerId,
+            'name' => 'South Base',
+            'latitude' => 1.0,
+            'longitude' => 1.0,
+            'sensor_model' => 'Y',
+        ])->json('id');
+
+        $this->postJson('/api/measurements', [
+            'station_id' => $northStation,
+            'temperature' => 22.0,
+            'humidity' => 50.0,
+            'pressure' => 1000.0,
+            'reported_at' => '2026-04-12T10:00:00+00:00',
+        ])->assertCreated();
+
+        $this->postJson('/api/measurements', [
+            'station_id' => $southStation,
+            'temperature' => 23.0,
+            'humidity' => 50.0,
+            'pressure' => 1000.0,
+            'reported_at' => '2026-04-13T10:00:00+00:00',
+        ])->assertCreated();
+
+        $this->getJson('/api/measurements?station_name=north')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.station_id', $northStation);
+    }
+
+    public function test_history_filters_by_temperature_range_and_alerts_only(): void
+    {
+        $ownerId = $this->postJson('/api/users', [
+            'email' => 'history-filters@example.com',
+            'name' => 'HF',
+        ])->json('id');
+
+        $stationId = $this->postJson('/api/stations', [
+            'owner_id' => $ownerId,
+            'name' => 'Filter Station',
+            'latitude' => 0.0,
+            'longitude' => 0.0,
+            'sensor_model' => 'X',
+        ])->json('id');
+
+        $this->postJson('/api/measurements', [
+            'station_id' => $stationId,
+            'temperature' => 25.0,
+            'humidity' => 50.0,
+            'pressure' => 1000.0,
+            'reported_at' => '2026-04-12T10:00:00+00:00',
+        ])->assertCreated();
+
+        $this->postJson('/api/measurements', [
+            'station_id' => $stationId,
+            'temperature' => 41.0,
+            'humidity' => 50.0,
+            'pressure' => 1000.0,
+            'reported_at' => '2026-04-13T10:00:00+00:00',
+        ])->assertCreated();
+
+        $this->getJson('/api/measurements?min_temperature=30&max_temperature=45&alerts_only=1')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.temperature', 41)
+            ->assertJsonPath('0.alert', true);
+    }
+
+    public function test_history_returns_422_when_min_temperature_is_greater_than_max_temperature(): void
+    {
+        $this->getJson('/api/measurements?min_temperature=50&max_temperature=10')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['min_temperature']);
+    }
 }

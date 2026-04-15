@@ -6,6 +6,7 @@ namespace Tests\Support;
 
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\Repository\UserRepository;
+use WeatherFlow\Domain\ValueObject\Id;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class InMemoryUserRepository implements UserRepository
@@ -18,12 +19,12 @@ final class InMemoryUserRepository implements UserRepository
         $this->users[$user->id()->value] = $user;
     }
 
-    public function findById(UserId $id): ?User
+    public function findById(Id $id): ?User
     {
         return $this->users[$id->value] ?? null;
     }
 
-    public function delete(UserId $id): void
+    public function delete(Id $id): void
     {
         unset($this->users[$id->value]);
     }
