@@ -8,13 +8,13 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use WeatherFlow\Domain\ValueObject\Humidity;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 final class Measurement implements WeatherflowEntity
 {
     public function __construct(
         private readonly MeasurementId $id,
-        private readonly StationId $stationId,
+        private readonly WeatherStationId $weatherStationId,
         private float $temperatureCelsius,
         private Humidity $humidity,
         private float $pressureHpa,
@@ -32,9 +32,9 @@ final class Measurement implements WeatherflowEntity
         return $this->id;
     }
 
-    public function stationId(): StationId
+    public function weatherStationId(): WeatherStationId
     {
-        return $this->stationId;
+        return $this->weatherStationId;
     }
 
     public function temperatureCelsius(): float

@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\ValueObject\Email;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class UserEntityTest extends TestCase
@@ -33,28 +33,28 @@ final class UserEntityTest extends TestCase
         $user->rename('');
     }
 
-    public function test_subscribe_to_station_is_idempotent(): void
+    public function test_subscribe_to_weather_station_is_idempotent(): void
     {
-        $station = new StationId('st-1');
+        $station = new WeatherStationId('st-1');
         $user = new User(new UserId('user-1'), new Email('a@b.com'), 'Ada');
 
-        $user->subscribeToStation($station);
-        $user->subscribeToStation($station);
+        $user->subscribeToWeatherStation($station);
+        $user->subscribeToWeatherStation($station);
 
-        $this->assertCount(1, $user->subscribedStationIds());
-        $this->assertSame('st-1', $user->subscribedStationIds()[0]->value);
+        $this->assertCount(1, $user->subscribedWeatherStationIds());
+        $this->assertSame('st-1', $user->subscribedWeatherStationIds()[0]->value);
     }
 
-    public function test_unsubscribe_removes_station(): void
+    public function test_unsubscribe_removes_weather_station(): void
     {
-        $s1 = new StationId('st-1');
-        $s2 = new StationId('st-2');
+        $s1 = new WeatherStationId('st-1');
+        $s2 = new WeatherStationId('st-2');
         $user = new User(new UserId('user-1'), new Email('a@b.com'), 'Ada', [$s1, $s2]);
 
-        $user->unsubscribeFromStation($s1);
+        $user->unsubscribeFromWeatherStation($s1);
 
-        $this->assertCount(1, $user->subscribedStationIds());
-        $this->assertSame('st-2', $user->subscribedStationIds()[0]->value);
+        $this->assertCount(1, $user->subscribedWeatherStationIds());
+        $this->assertSame('st-2', $user->subscribedWeatherStationIds()[0]->value);
     }
 
     public function test_change_email_updates_value(): void

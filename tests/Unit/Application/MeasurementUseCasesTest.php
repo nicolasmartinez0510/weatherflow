@@ -16,15 +16,15 @@ use WeatherFlow\Application\UseCase\Measurement\CreateMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\DeleteMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\GetMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\ListMeasurementHistoryUseCase;
-use WeatherFlow\Application\UseCase\Measurement\ListMeasurementsByStationUseCase;
+use WeatherFlow\Application\UseCase\Measurement\ListMeasurementsByWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\Measurement\UpdateMeasurementUseCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\Entity\WeatherStation;
 use WeatherFlow\Domain\Service\MeasurementAlertEvaluator;
 use WeatherFlow\Domain\ValueObject\Coordinates;
 use WeatherFlow\Domain\ValueObject\Email;
-use WeatherFlow\Domain\ValueObject\StationId;
-use WeatherFlow\Domain\ValueObject\StationStatus;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class MeasurementUseCasesTest extends TestCase
@@ -152,7 +152,7 @@ final class MeasurementUseCasesTest extends TestCase
             new DateTimeImmutable('2026-01-02T12:00:00+00:00'),
         );
 
-        $list = new ListMeasurementsByStationUseCase($this->stations, $this->measurements);
+        $list = new ListMeasurementsByWeatherStationUseCase($this->stations, $this->measurements);
         $items = $list->execute('s-list');
 
         $this->assertCount(2, $items);
@@ -162,7 +162,7 @@ final class MeasurementUseCasesTest extends TestCase
 
     public function test_list_by_station_throws_when_station_missing(): void
     {
-        $list = new ListMeasurementsByStationUseCase($this->stations, $this->measurements);
+        $list = new ListMeasurementsByWeatherStationUseCase($this->stations, $this->measurements);
 
         $this->expectException(StationNotFoundException::class);
         $list->execute('no-station');
@@ -189,7 +189,7 @@ final class MeasurementUseCasesTest extends TestCase
         $items = $history->execute('north', 30.0, 45.0, true);
 
         $this->assertCount(1, $items);
-        $this->assertSame('s-north', $items[0]->stationId);
+        $this->assertSame('s-north', $items[0]->weatherStationId);
         $this->assertSame(41.0, $items[0]->temperature);
         $this->assertTrue($items[0]->alert);
     }
@@ -218,11 +218,11 @@ final class MeasurementUseCasesTest extends TestCase
         ));
 
         $this->stations->save(new WeatherStation(
-            new StationId($stationId),
+            new WeatherStationId($stationId),
             $stationName,
             new Coordinates(0.0, 0.0),
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('owner-1'),
         ));
     }

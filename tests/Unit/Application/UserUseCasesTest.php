@@ -11,8 +11,8 @@ use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\User\CreateUserUseCase;
 use WeatherFlow\Application\UseCase\User\DeleteUserUseCase;
 use WeatherFlow\Application\UseCase\User\GetUserUseCase;
-use WeatherFlow\Application\UseCase\User\SubscribeUserToStationUseCase;
-use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromStationUseCase;
+use WeatherFlow\Application\UseCase\User\SubscribeUserToWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UpdateUserUseCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\ValueObject\Email;
@@ -39,7 +39,7 @@ final class UserUseCasesTest extends TestCase
         $this->assertSame($created->id, $loaded->id);
         $this->assertSame('ada@example.com', $loaded->email);
         $this->assertSame('Ada', $loaded->name);
-        $this->assertSame([], $loaded->subscribedStationIds);
+        $this->assertSame([], $loaded->subscribedWeatherStationIds);
     }
 
     public function test_get_missing_user_throws(): void
@@ -120,7 +120,7 @@ final class UserUseCasesTest extends TestCase
 
     public function test_subscribe_throws_when_user_missing(): void
     {
-        $subscribe = new SubscribeUserToStationUseCase($this->users);
+        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users);
 
         $this->expectException(UserNotFoundException::class);
         $subscribe->execute('missing', 'st-1');
@@ -128,7 +128,7 @@ final class UserUseCasesTest extends TestCase
 
     public function test_unsubscribe_throws_when_user_missing(): void
     {
-        $unsubscribe = new UnsubscribeUserFromStationUseCase($this->users);
+        $unsubscribe = new UnsubscribeUserFromWeatherStationUseCase($this->users);
 
         $this->expectException(UserNotFoundException::class);
         $unsubscribe->execute('missing', 'st-1');
@@ -142,13 +142,13 @@ final class UserUseCasesTest extends TestCase
             'Ada',
         ));
 
-        $subscribe = new SubscribeUserToStationUseCase($this->users);
+        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users);
         $afterSub = $subscribe->execute('u-1', 'st-42');
-        $this->assertSame(['st-42'], $afterSub->subscribedStationIds);
+        $this->assertSame(['st-42'], $afterSub->subscribedWeatherStationIds);
 
-        $unsubscribe = new UnsubscribeUserFromStationUseCase($this->users);
+        $unsubscribe = new UnsubscribeUserFromWeatherStationUseCase($this->users);
         $afterUnsub = $unsubscribe->execute('u-1', 'st-42');
-        $this->assertSame([], $afterUnsub->subscribedStationIds);
+        $this->assertSame([], $afterUnsub->subscribedWeatherStationIds);
     }
 
     public function test_delete_user(): void

@@ -6,19 +6,19 @@ namespace WeatherFlow\Domain\Entity;
 
 use InvalidArgumentException;
 use WeatherFlow\Domain\ValueObject\Coordinates;
-use WeatherFlow\Domain\ValueObject\StationId;
-use WeatherFlow\Domain\ValueObject\StationStatus;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class WeatherStation implements WeatherflowEntity
 {
     public function __construct(
-        private readonly StationId $id,
-        private string $name,
-        private Coordinates $coordinates,
-        private string $sensorModel,
-        private StationStatus $status,
-        private readonly UserId $ownerId,
+        private readonly WeatherStationId $id,
+        private string                    $name,
+        private Coordinates               $coordinates,
+        private string                    $sensorModel,
+        private WeatherStationStatus      $status,
+        private readonly UserId           $ownerId,
     ) {
         if ($name === '') {
             throw new InvalidArgumentException('Station name cannot be empty.');
@@ -28,7 +28,7 @@ final class WeatherStation implements WeatherflowEntity
         }
     }
 
-    public function id(): StationId
+    public function id(): WeatherStationId
     {
         return $this->id;
     }
@@ -48,7 +48,7 @@ final class WeatherStation implements WeatherflowEntity
         return $this->sensorModel;
     }
 
-    public function status(): StationStatus
+    public function status(): WeatherStationStatus
     {
         return $this->status;
     }
@@ -79,7 +79,7 @@ final class WeatherStation implements WeatherflowEntity
         $this->sensorModel = $sensorModel;
     }
 
-    public function setStatus(StationStatus $status): void
+    public function setStatus(WeatherStationStatus $status): void
     {
         $this->status = $status;
     }

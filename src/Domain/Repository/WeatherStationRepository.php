@@ -10,7 +10,7 @@ use WeatherFlow\Domain\ValueObject\Id;
 
 interface WeatherStationRepository
 {
-    public function save(WeatherStation $station): void;
+    public function save(WeatherStation $weatherStation): void;
 
     public function findById(Id $id): ?WeatherflowEntity;
 

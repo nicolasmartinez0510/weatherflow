@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace WeatherFlow\Application\UseCase\Station;
+namespace WeatherFlow\Application\UseCase\WeatherStation;
 
+use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\Entity\WeatherStation;
 
-final readonly class StationResponse
+final readonly class WeatherStationResponse
 {
     public function __construct(
         public string $id,
@@ -18,7 +19,7 @@ final readonly class StationResponse
         public string $ownerId,
     ) {}
 
-    public static function fromEntity(WeatherStation $station): self
+    public static function fromEntity(WeatherStation|WeatherflowEntity $station): self
     {
         $coords = $station->coordinates();
 

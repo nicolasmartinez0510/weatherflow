@@ -10,16 +10,16 @@ use Tests\Support\InMemoryUserRepository;
 use Tests\Support\InMemoryWeatherStationRepository;
 use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\Exception\UserNotFoundException;
-use WeatherFlow\Application\UseCase\Station\CreateWeatherStationUseCase;
-use WeatherFlow\Application\UseCase\Station\DeleteWeatherStationUseCase;
-use WeatherFlow\Application\UseCase\Station\GetWeatherStationUseCase;
-use WeatherFlow\Application\UseCase\Station\UpdateWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\CreateWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\DeleteWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\GetWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\UpdateWeatherStationUseCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\Entity\WeatherStation;
 use WeatherFlow\Domain\ValueObject\Coordinates;
 use WeatherFlow\Domain\ValueObject\Email;
-use WeatherFlow\Domain\ValueObject\StationId;
-use WeatherFlow\Domain\ValueObject\StationStatus;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class WeatherStationUseCasesTest extends TestCase
@@ -35,7 +35,7 @@ final class WeatherStationUseCasesTest extends TestCase
         $this->stations = new InMemoryWeatherStationRepository;
     }
 
-    public function test_create_station_requires_existing_owner(): void
+    public function test_create_weather_station_requires_existing_owner(): void
     {
         $create = new CreateWeatherStationUseCase($this->users, $this->stations);
 
@@ -46,11 +46,11 @@ final class WeatherStationUseCasesTest extends TestCase
             -34.0,
             -58.0,
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
         );
     }
 
-    public function test_create_and_get_station_with_inactive_status(): void
+    public function test_create_and_get_weather_station_with_inactive_status(): void
     {
         $this->users->save(new User(
             new UserId('u-1'),
@@ -65,7 +65,7 @@ final class WeatherStationUseCasesTest extends TestCase
             -34.6,
             -58.4,
             'DHT22',
-            StationStatus::Inactive,
+            WeatherStationStatus::Inactive,
         );
 
         $this->assertSame('u-1', $created->ownerId);
@@ -81,7 +81,7 @@ final class WeatherStationUseCasesTest extends TestCase
         $this->assertSame('DHT22', $loaded->sensorModel);
     }
 
-    public function test_get_missing_station_throws(): void
+    public function test_get_missing_weather_station_throws(): void
     {
         $get = new GetWeatherStationUseCase($this->stations);
 
@@ -89,7 +89,7 @@ final class WeatherStationUseCasesTest extends TestCase
         $get->execute('missing-id');
     }
 
-    public function test_update_throws_when_station_missing(): void
+    public function test_update_throws_when_weather_station_missing(): void
     {
         $update = new UpdateWeatherStationUseCase($this->stations);
 
@@ -100,11 +100,11 @@ final class WeatherStationUseCasesTest extends TestCase
     public function test_update_sensor_model_only(): void
     {
         $this->stations->save(new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'X',
             new Coordinates(1.0, 2.0),
             'Old',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('u-1'),
         ));
 
@@ -119,16 +119,16 @@ final class WeatherStationUseCasesTest extends TestCase
     public function test_update_status_only(): void
     {
         $this->stations->save(new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'X',
             new Coordinates(0.0, 0.0),
             'A',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('u-1'),
         ));
 
         $update = new UpdateWeatherStationUseCase($this->stations);
-        $updated = $update->execute('st-1', null, null, null, null, StationStatus::Inactive);
+        $updated = $update->execute('st-1', null, null, null, null, WeatherStationStatus::Inactive);
 
         $this->assertSame('inactive', $updated->status);
     }
@@ -136,11 +136,11 @@ final class WeatherStationUseCasesTest extends TestCase
     public function test_update_name_and_location(): void
     {
         $this->stations->save(new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'Old',
             new Coordinates(-10.0, -20.0),
             'A',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('u-1'),
         ));
 
@@ -155,11 +155,11 @@ final class WeatherStationUseCasesTest extends TestCase
     public function test_update_latitude_without_longitude_throws(): void
     {
         $this->stations->save(new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'X',
             new Coordinates(0.0, 0.0),
             'A',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('u-1'),
         ));
 
@@ -173,11 +173,11 @@ final class WeatherStationUseCasesTest extends TestCase
     public function test_update_with_no_fields_throws(): void
     {
         $this->stations->save(new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'X',
             new Coordinates(0.0, 0.0),
             'A',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('u-1'),
         ));
 
@@ -188,14 +188,14 @@ final class WeatherStationUseCasesTest extends TestCase
         $update->execute('st-1', null, null, null, null, null);
     }
 
-    public function test_delete_station(): void
+    public function test_delete_weather_station(): void
     {
         $this->stations->save(new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'X',
             new Coordinates(0.0, 0.0),
             'A',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('u-1'),
         ));
 

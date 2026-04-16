@@ -12,11 +12,11 @@ use Illuminate\Http\Response;
 use InvalidArgumentException;
 use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\Exception\UserNotFoundException;
-use WeatherFlow\Application\UseCase\Station\CreateWeatherStationUseCase;
-use WeatherFlow\Application\UseCase\Station\DeleteWeatherStationUseCase;
-use WeatherFlow\Application\UseCase\Station\GetWeatherStationUseCase;
-use WeatherFlow\Application\UseCase\Station\UpdateWeatherStationUseCase;
-use WeatherFlow\Domain\ValueObject\StationStatus;
+use WeatherFlow\Application\UseCase\WeatherStation\CreateWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\DeleteWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\GetWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\UpdateWeatherStationUseCase;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 
 final class WeatherStationController extends Controller
 {
@@ -29,8 +29,8 @@ final class WeatherStationController extends Controller
 
     public function store(StoreWeatherStationRequest $request): JsonResponse
     {
-        $statusRaw = (string) ($request->validated('status') ?? StationStatus::Active->value);
-        $status = StationStatus::tryFrom($statusRaw) ?? StationStatus::Active;
+        $statusRaw = (string) ($request->validated('status') ?? WeatherStationStatus::Active->value);
+        $status = WeatherStationStatus::tryFrom($statusRaw) ?? WeatherStationStatus::Active;
 
         try {
             $response = $this->createStation->execute(
@@ -65,7 +65,7 @@ final class WeatherStationController extends Controller
 
         $status = null;
         if (array_key_exists('status', $data)) {
-            $status = StationStatus::from((string) $data['status']);
+            $status = WeatherStationStatus::from((string) $data['status']);
         }
 
         try {

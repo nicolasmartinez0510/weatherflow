@@ -12,7 +12,7 @@ use WeatherFlow\Domain\Service\MeasurementAlertEvaluator;
 use WeatherFlow\Domain\ValueObject\AlertType;
 use WeatherFlow\Domain\ValueObject\Humidity;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 final class MeasurementEntityTest extends TestCase
 {
@@ -21,7 +21,7 @@ final class MeasurementEntityTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         new Measurement(
             new MeasurementId('m-1'),
-            new StationId('s-1'),
+            new WeatherStationId('s-1'),
             20.0,
             new Humidity(50.0),
             0.0,
@@ -38,7 +38,7 @@ final class MeasurementEntityTest extends TestCase
 
         $m = new Measurement(
             new MeasurementId('m-1'),
-            new StationId('s-1'),
+            new WeatherStationId('s-1'),
             20.0,
             new Humidity(50.0),
             1000.0,

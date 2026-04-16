@@ -14,7 +14,7 @@ final class StoreMeasurementRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'station_id' => ['required', 'string', 'min:1'],
+            'weather_station_id' => ['required', 'string', 'min:1'],
             'temperature' => ['required', 'numeric'],
             'humidity' => ['required', 'numeric', 'between:0,100'],
             'pressure' => ['required', 'numeric', 'min:0.01'],

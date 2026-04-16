@@ -11,45 +11,47 @@ use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\Repository\UserRepository;
 use WeatherFlow\Domain\ValueObject\Email;
-use WeatherFlow\Domain\ValueObject\StationId;
 use WeatherFlow\Domain\ValueObject\UserId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 /**
  * @extends MongoPersistence<User, UserId>
  */
-final class MongoUserRepository  extends MongoPersistence implements UserRepository {
-
-    public function __construct(Client $client, string $databaseName, string $collectionName = 'users') {
+final class MongoUserRepository extends MongoPersistence implements UserRepository
+{
+    public function __construct(Client $client, string $databaseName, string $collectionName = 'users')
+    {
         parent::__construct($client, $databaseName, $collectionName);
     }
 
-    protected function getDocByEntity(User|WeatherflowEntity $entity): array|object {
+    protected function getDocByEntity(User|WeatherflowEntity $entity): array|object
+    {
         return [
-            '_id' =>  $entity->id()->value,
+            '_id' => $entity->id()->value,
             'email' => $entity->email()->value,
             'name' => $entity->name(),
-            'subscribedStationIds' => array_map(
-                static fn (StationId $id): string => $id->value,
-                $entity->subscribedStationIds(),
+            'subscribedWeatherStationIds' => array_map(
+                static fn (WeatherStationId $id): string => $id->value,
+                $entity->subscribedWeatherStationIds(),
             ),
         ];
-
     }
 
     /**
      * @param  BSONDocument|array<string, mixed>  $doc
      */
-    protected function mapDocumentToEntity(array|object $doc): User {
+    protected function mapDocumentToEntity(array|object $doc): User
+    {
         $data = $this->documentToArray($doc);
 
-        $stationRaw = $data['subscribedStationIds'] ?? [];
+        $stationRaw = $data['subscribedWeatherStationIds'] ?? $data['subscribedStationIds'] ?? [];
         $stationList = match (true) {
             is_array($stationRaw) => $stationRaw,
             $stationRaw instanceof Traversable => iterator_to_array($stationRaw, false),
             default => [],
         };
-        $stationIds = array_map(
-            static fn (mixed $sid): StationId => new StationId((string) $sid),
+        $weatherStationIds = array_map(
+            static fn (mixed $sid): WeatherStationId => new WeatherStationId((string) $sid),
             $stationList,
         );
 
@@ -57,7 +59,7 @@ final class MongoUserRepository  extends MongoPersistence implements UserReposit
             new UserId((string) $data['_id']),
             new Email((string) $data['email']),
             (string) $data['name'],
-            $stationIds,
+            $weatherStationIds,
         );
     }
 
@@ -65,7 +67,8 @@ final class MongoUserRepository  extends MongoPersistence implements UserReposit
      * @param  BSONDocument|array<string, mixed>  $doc
      * @return array<string, mixed>
      */
-    private function documentToArray(array|object $doc): array {
+    private function documentToArray(array|object $doc): array
+    {
         if (is_array($doc)) {
             return $doc;
         }

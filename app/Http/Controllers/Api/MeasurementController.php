@@ -19,7 +19,7 @@ use WeatherFlow\Application\UseCase\Measurement\CreateMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\DeleteMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\GetMeasurementUseCase;
 use WeatherFlow\Application\UseCase\Measurement\ListMeasurementHistoryUseCase;
-use WeatherFlow\Application\UseCase\Measurement\ListMeasurementsByStationUseCase;
+use WeatherFlow\Application\UseCase\Measurement\ListMeasurementsByWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\Measurement\UpdateMeasurementUseCase;
 
 final class MeasurementController extends Controller
@@ -30,7 +30,7 @@ final class MeasurementController extends Controller
         private readonly UpdateMeasurementUseCase $updateMeasurement,
         private readonly DeleteMeasurementUseCase $deleteMeasurement,
         private readonly ListMeasurementHistoryUseCase $listHistory,
-        private readonly ListMeasurementsByStationUseCase $listByStation,
+        private readonly ListMeasurementsByWeatherStationUseCase $listByWeatherStation,
     ) {}
 
     /**
@@ -43,14 +43,14 @@ final class MeasurementController extends Controller
 
         try {
             $response = $this->createMeasurement->execute(
-                (string) $data['station_id'],
+                (string) $data['weather_station_id'],
                 (float) $data['temperature'],
                 (float) $data['humidity'],
                 (float) $data['pressure'],
                 $reportedAt,
             );
         } catch (StationNotFoundException) {
-            return response()->json(['message' => 'Station not found.'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Weather station not found.'], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json($response->toArray(), Response::HTTP_CREATED);
@@ -120,12 +120,12 @@ final class MeasurementController extends Controller
         return response()->noContent();
     }
 
-    public function indexByStation(string $stationId): JsonResponse
+    public function indexByWeatherStation(string $weatherStationId): JsonResponse
     {
         try {
-            $items = $this->listByStation->execute($stationId);
+            $items = $this->listByWeatherStation->execute($weatherStationId);
         } catch (StationNotFoundException) {
-            return response()->json(['message' => 'Station not found.'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Weather station not found.'], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json(array_map(

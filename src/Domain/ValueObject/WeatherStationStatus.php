@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace WeatherFlow\Domain\ValueObject;
 
-enum StationStatus: string
+enum WeatherStationStatus: string
 {
     case Active = 'active';
     case Inactive = 'inactive';
