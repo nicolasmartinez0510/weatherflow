@@ -8,8 +8,8 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use WeatherFlow\Domain\Entity\WeatherStation;
 use WeatherFlow\Domain\ValueObject\Coordinates;
-use WeatherFlow\Domain\ValueObject\StationId;
-use WeatherFlow\Domain\ValueObject\StationStatus;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 use WeatherFlow\Domain\ValueObject\UserId;
 
 final class WeatherStationEntityTest extends TestCase
@@ -20,11 +20,11 @@ final class WeatherStationEntityTest extends TestCase
         $this->expectExceptionMessage('Station name cannot be empty.');
 
         new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             '',
             new Coordinates(-34.0, -58.0),
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('user-1'),
         );
     }
@@ -35,11 +35,11 @@ final class WeatherStationEntityTest extends TestCase
         $this->expectExceptionMessage('Sensor model cannot be empty.');
 
         new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'Central',
             new Coordinates(-34.0, -58.0),
             '',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('user-1'),
         );
     }
@@ -47,11 +47,11 @@ final class WeatherStationEntityTest extends TestCase
     public function test_relocate_updates_coordinates(): void
     {
         $station = new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'Central',
             new Coordinates(-34.0, -58.0),
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('user-1'),
         );
 
@@ -64,27 +64,27 @@ final class WeatherStationEntityTest extends TestCase
     public function test_set_status(): void
     {
         $station = new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'Central',
             new Coordinates(-34.0, -58.0),
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('user-1'),
         );
 
-        $station->setStatus(StationStatus::Inactive);
+        $station->setStatus(WeatherStationStatus::Inactive);
 
-        $this->assertSame(StationStatus::Inactive, $station->status());
+        $this->assertSame(WeatherStationStatus::Inactive, $station->status());
     }
 
     public function test_rename_empty_string_throws(): void
     {
         $station = new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'Central',
             new Coordinates(-34.0, -58.0),
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('user-1'),
         );
 
@@ -96,11 +96,11 @@ final class WeatherStationEntityTest extends TestCase
     public function test_change_sensor_model_empty_string_throws(): void
     {
         $station = new WeatherStation(
-            new StationId('st-1'),
+            new WeatherStationId('st-1'),
             'Central',
             new Coordinates(-34.0, -58.0),
             'DHT22',
-            StationStatus::Active,
+            WeatherStationStatus::Active,
             new UserId('user-1'),
         );
 

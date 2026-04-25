@@ -23,7 +23,7 @@ final class UserApiTest extends TestCase
         $show->assertOk();
         $show->assertJsonPath('email', 'ada@example.com');
         $show->assertJsonPath('name', 'Ada');
-        $show->assertJsonPath('subscribed_station_ids', []);
+        $show->assertJsonPath('subscribed_weather_station_ids', []);
     }
 
     public function test_show_returns_404_for_unknown_user(): void
@@ -40,12 +40,12 @@ final class UserApiTest extends TestCase
         ])->json('id');
 
         $this->postJson('/api/users/'.$id.'/subscriptions', [
-            'station_id' => 'st-1',
-        ])->assertOk()->assertJsonPath('subscribed_station_ids', ['st-1']);
+            'weather_station_id' => 'st-1',
+        ])->assertOk()->assertJsonPath('subscribed_weather_station_ids', ['st-1']);
 
         $this->deleteJson('/api/users/'.$id.'/subscriptions/st-1')
             ->assertOk()
-            ->assertJsonPath('subscribed_station_ids', []);
+            ->assertJsonPath('subscribed_weather_station_ids', []);
     }
 
     public function test_patch_user(): void
@@ -128,7 +128,7 @@ final class UserApiTest extends TestCase
             ->assertJsonValidationErrors(['email']);
     }
 
-    public function test_subscribe_returns_422_without_station_id(): void
+    public function test_subscribe_returns_422_without_weather_station_id(): void
     {
         $id = $this->postJson('/api/users', [
             'email' => 'sub@example.com',
@@ -137,7 +137,7 @@ final class UserApiTest extends TestCase
 
         $this->postJson('/api/users/'.$id.'/subscriptions', [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['station_id']);
+            ->assertJsonValidationErrors(['weather_station_id']);
     }
 
     public function test_patch_returns_404_when_user_does_not_exist(): void
@@ -150,7 +150,7 @@ final class UserApiTest extends TestCase
     public function test_subscribe_returns_404_when_user_does_not_exist(): void
     {
         $this->postJson('/api/users/unknown-user-id/subscriptions', [
-            'station_id' => 'st-1',
+            'weather_station_id' => 'st-1',
         ])->assertNotFound();
     }
 

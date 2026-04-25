@@ -11,7 +11,7 @@ final readonly class MeasurementResponse
 {
     public function __construct(
         public string $id,
-        public string $stationId,
+        public string $weatherStationId,
         public float $temperature,
         public float $humidity,
         public float $pressure,
@@ -24,7 +24,7 @@ final readonly class MeasurementResponse
     {
         return new self(
             $measurement->id()->value,
-            $measurement->stationId()->value,
+            $measurement->weatherStationId()->value,
             $measurement->temperatureCelsius(),
             $measurement->humidity()->percent,
             $measurement->pressureHpa(),
@@ -41,7 +41,7 @@ final readonly class MeasurementResponse
     {
         return [
             'id' => $this->id,
-            'station_id' => $this->stationId,
+            'weather_station_id' => $this->weatherStationId,
             'temperature' => $this->temperature,
             'humidity' => $this->humidity,
             'pressure' => $this->pressure,

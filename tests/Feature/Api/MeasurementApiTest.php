@@ -15,7 +15,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'M',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'S',
             'latitude' => 0.0,
@@ -24,7 +24,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $create = $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 22.5,
             'humidity' => 55.0,
             'pressure' => 1013.2,
@@ -39,7 +39,7 @@ final class MeasurementApiTest extends TestCase
 
         $show = $this->getJson('/api/measurements/'.$id);
         $show->assertOk();
-        $show->assertJsonPath('station_id', $stationId);
+        $show->assertJsonPath('weather_station_id', $weatherStationId);
         $show->assertJsonPath('temperature', 22.5);
         $show->assertJsonPath('humidity', 55);
         $show->assertJsonPath('pressure', 1013.2);
@@ -52,7 +52,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'H',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'Hot',
             'latitude' => 0.0,
@@ -61,7 +61,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 41.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -75,7 +75,7 @@ final class MeasurementApiTest extends TestCase
     public function test_create_returns_404_when_station_missing(): void
     {
         $this->postJson('/api/measurements', [
-            'station_id' => '00000000-0000-0000-0000-000000000099',
+            'weather_station_id' => '00000000-0000-0000-0000-000000000099',
             'temperature' => 20.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -96,7 +96,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'L',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'List',
             'latitude' => 0.0,
@@ -105,7 +105,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 20.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -113,14 +113,14 @@ final class MeasurementApiTest extends TestCase
         ])->assertCreated();
 
         $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 21.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
             'reported_at' => '2026-04-13T10:00:00+00:00',
         ])->assertCreated();
 
-        $list = $this->getJson('/api/stations/'.$stationId.'/measurements');
+        $list = $this->getJson('/api/weather-stations/'.$weatherStationId.'/measurements');
         $list->assertOk();
         $list->assertJsonCount(2);
         $list->assertJsonPath('0.temperature', 21);
@@ -129,7 +129,7 @@ final class MeasurementApiTest extends TestCase
 
     public function test_list_by_station_returns_404_when_station_unknown(): void
     {
-        $this->getJson('/api/stations/unknown-station/measurements')
+        $this->getJson('/api/weather-stations/unknown-station/measurements')
             ->assertNotFound();
     }
 
@@ -140,7 +140,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'P',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'P',
             'latitude' => 0.0,
@@ -149,7 +149,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $id = $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 20.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -171,7 +171,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'D',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'D',
             'latitude' => 0.0,
@@ -180,7 +180,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $id = $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 20.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -190,7 +190,7 @@ final class MeasurementApiTest extends TestCase
         $this->deleteJson('/api/measurements/'.$id)->assertNoContent();
     }
 
-    public function test_store_returns_422_when_station_id_missing(): void
+    public function test_store_returns_422_when_weather_station_id_missing(): void
     {
         $this->postJson('/api/measurements', [
             'temperature' => 20.0,
@@ -199,7 +199,7 @@ final class MeasurementApiTest extends TestCase
             'reported_at' => '2026-04-12T10:00:00+00:00',
         ])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['station_id']);
+            ->assertJsonValidationErrors(['weather_station_id']);
     }
 
     public function test_store_returns_422_when_humidity_out_of_range(): void
@@ -209,7 +209,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'H',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'H',
             'latitude' => 0.0,
@@ -218,7 +218,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 20.0,
             'humidity' => 101.0,
             'pressure' => 1000.0,
@@ -235,7 +235,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'E',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'E',
             'latitude' => 0.0,
@@ -244,7 +244,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $id = $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 20.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -263,7 +263,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'G',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'G',
             'latitude' => 0.0,
@@ -272,7 +272,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $id = $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 20.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -304,7 +304,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'HN',
         ])->json('id');
 
-        $northStation = $this->postJson('/api/stations', [
+        $northWeatherStation = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'North Base',
             'latitude' => 0.0,
@@ -312,7 +312,7 @@ final class MeasurementApiTest extends TestCase
             'sensor_model' => 'X',
         ])->json('id');
 
-        $southStation = $this->postJson('/api/stations', [
+        $southWeatherStation = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'South Base',
             'latitude' => 1.0,
@@ -321,7 +321,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $this->postJson('/api/measurements', [
-            'station_id' => $northStation,
+            'weather_station_id' => $northWeatherStation,
             'temperature' => 22.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -329,7 +329,7 @@ final class MeasurementApiTest extends TestCase
         ])->assertCreated();
 
         $this->postJson('/api/measurements', [
-            'station_id' => $southStation,
+            'weather_station_id' => $southWeatherStation,
             'temperature' => 23.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -339,7 +339,7 @@ final class MeasurementApiTest extends TestCase
         $this->getJson('/api/measurements?station_name=north')
             ->assertOk()
             ->assertJsonCount(1)
-            ->assertJsonPath('0.station_id', $northStation);
+            ->assertJsonPath('0.weather_station_id', $northWeatherStation);
     }
 
     public function test_history_filters_by_temperature_range_and_alerts_only(): void
@@ -349,7 +349,7 @@ final class MeasurementApiTest extends TestCase
             'name' => 'HF',
         ])->json('id');
 
-        $stationId = $this->postJson('/api/stations', [
+        $weatherStationId = $this->postJson('/api/weather-stations', [
             'owner_id' => $ownerId,
             'name' => 'Filter Station',
             'latitude' => 0.0,
@@ -358,7 +358,7 @@ final class MeasurementApiTest extends TestCase
         ])->json('id');
 
         $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 25.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,
@@ -366,7 +366,7 @@ final class MeasurementApiTest extends TestCase
         ])->assertCreated();
 
         $this->postJson('/api/measurements', [
-            'station_id' => $stationId,
+            'weather_station_id' => $weatherStationId,
             'temperature' => 41.0,
             'humidity' => 50.0,
             'pressure' => 1000.0,

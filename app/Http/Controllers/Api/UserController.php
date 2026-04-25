@@ -14,8 +14,8 @@ use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\User\CreateUserUseCase;
 use WeatherFlow\Application\UseCase\User\DeleteUserUseCase;
 use WeatherFlow\Application\UseCase\User\GetUserUseCase;
-use WeatherFlow\Application\UseCase\User\SubscribeUserToStationUseCase;
-use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromStationUseCase;
+use WeatherFlow\Application\UseCase\User\SubscribeUserToWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UpdateUserUseCase;
 
 final class UserController extends Controller
@@ -25,8 +25,8 @@ final class UserController extends Controller
         private readonly GetUserUseCase $getUser,
         private readonly UpdateUserUseCase $updateUser,
         private readonly DeleteUserUseCase $deleteUser,
-        private readonly SubscribeUserToStationUseCase $subscribeUser,
-        private readonly UnsubscribeUserFromStationUseCase $unsubscribeUser,
+        private readonly SubscribeUserToWeatherStationUseCase $subscribeUser,
+        private readonly UnsubscribeUserFromWeatherStationUseCase $unsubscribeUser,
     ) {
     }
 
@@ -76,7 +76,7 @@ final class UserController extends Controller
     public function subscribe(SubscriptionRequest $request, string $id): JsonResponse
     {
         try {
-            $response = $this->subscribeUser->execute($id, (string) $request->validated('station_id'));
+            $response = $this->subscribeUser->execute($id, (string) $request->validated('weather_station_id'));
         } catch (UserNotFoundException) {
             return response()->json(['message' => 'User not found.'], Response::HTTP_NOT_FOUND);
         }
@@ -84,10 +84,10 @@ final class UserController extends Controller
         return response()->json($response->toArray());
     }
 
-    public function unsubscribe(string $id, string $stationId): JsonResponse
+    public function unsubscribe(string $id, string $weatherStationId): JsonResponse
     {
         try {
-            $response = $this->unsubscribeUser->execute($id, $stationId);
+            $response = $this->unsubscribeUser->execute($id, $weatherStationId);
         } catch (UserNotFoundException) {
             return response()->json(['message' => 'User not found.'], Response::HTTP_NOT_FOUND);
         }

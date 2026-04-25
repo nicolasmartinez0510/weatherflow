@@ -13,24 +13,24 @@ use WeatherFlow\Domain\Repository\WeatherStationRepository;
 use WeatherFlow\Domain\Service\MeasurementAlertEvaluator;
 use WeatherFlow\Domain\ValueObject\Humidity;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 final readonly class CreateMeasurementUseCase
 {
     public function __construct(
-        private WeatherStationRepository $stations,
+        private WeatherStationRepository $weatherStations,
         private MeasurementRepository $measurements,
         private MeasurementAlertEvaluator $alertEvaluator,
     ) {}
 
     public function execute(
-        string $stationId,
+        string $weatherStationId,
         float $temperatureCelsius,
         float $humidityPercent,
         float $pressureHpa,
         DateTimeImmutable $reportedAt,
     ): MeasurementResponse {
-        if ($this->stations->findById(new StationId($stationId)) === null) {
+        if ($this->weatherStations->findById(new WeatherStationId($weatherStationId)) === null) {
             throw new StationNotFoundException();
         }
 
@@ -39,7 +39,7 @@ final readonly class CreateMeasurementUseCase
 
         $measurement = new Measurement(
             new MeasurementId(Uuid::uuid4()->toString()),
-            new StationId($stationId),
+            new WeatherStationId($weatherStationId),
             $temperatureCelsius,
             $humidity,
             $pressureHpa,

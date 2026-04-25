@@ -15,7 +15,7 @@ use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\Repository\MeasurementRepository;
 use WeatherFlow\Domain\ValueObject\Humidity;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 /**
  * @extends MongoPersistence<Measurement, MeasurementId>
@@ -25,11 +25,12 @@ final class MongoMeasurementRepository extends MongoPersistence
 {
     private Collection $stations;
 
-    public function __construct(Client $client, string $databaseName, string $collectionName = 'measurements') {
+    public function __construct(Client $client, string $databaseName, string $collectionName = 'measurements')
+    {
         parent::__construct($client, $databaseName, $collectionName);
         $this->stations = $this->database->selectCollection('stations');
 
-        $this->collection->createIndex(['stationId' => 1, 'reportedAt' => -1]);
+        $this->collection->createIndex(['weatherStationId' => 1, 'reportedAt' => -1]);
         $this->collection->createIndex(['temperatureCelsius' => 1, 'reportedAt' => -1]);
         $this->collection->createIndex(['alert' => 1, 'reportedAt' => -1]);
 
@@ -39,9 +40,15 @@ final class MongoMeasurementRepository extends MongoPersistence
     /**
      * @throws DateMalformedStringException
      */
-    public function findByStationId(StationId $stationId): array {
+    public function findByWeatherStationId(WeatherStationId $weatherStationId): array
+    {
         $mesurementDocs = $this->collection->find(
-            ['stationId' => $stationId->value],
+            [
+                '$or' => [
+                    ['weatherStationId' => $weatherStationId->value],
+                    ['stationId' => $weatherStationId->value],
+                ],
+            ],
             [
                 'sort' => ['reportedAt' => -1],
             ],
@@ -80,9 +87,16 @@ final class MongoMeasurementRepository extends MongoPersistence
 
         if ($stationName !== null && trim($stationName) !== '') {
             $pipeline[] = [
+                '$addFields' => [
+                    '__lookupWeatherStationId' => [
+                        '$ifNull' => ['$weatherStationId', '$stationId'],
+                    ],
+                ],
+            ];
+            $pipeline[] = [
                 '$lookup' => [
                     'from' => 'stations',
-                    'localField' => 'stationId',
+                    'localField' => '__lookupWeatherStationId',
                     'foreignField' => '_id',
                     'as' => 'station',
                 ],
@@ -105,10 +119,11 @@ final class MongoMeasurementRepository extends MongoPersistence
         return $this->mapDocumentsToMesurements($mesurementDocs);
     }
 
-    protected function getDocByEntity(Measurement|WeatherflowEntity $entity): array|object {
+    protected function getDocByEntity(Measurement|WeatherflowEntity $entity): array|object
+    {
         return [
             '_id' => $entity->id()->value,
-            'stationId' => $entity->stationId()->value,
+            'weatherStationId' => $entity->weatherStationId()->value,
             'temperatureCelsius' => $entity->temperatureCelsius(),
             'humidityPercent' => $entity->humidity()->percent,
             'pressureHpa' => $entity->pressureHpa(),
@@ -121,28 +136,34 @@ final class MongoMeasurementRepository extends MongoPersistence
     /**
      * @throws DateMalformedStringException
      */
-    private function mapDocumentsToMesurements($mesurementDocs): array {
+    private function mapDocumentsToMesurements($mesurementDocs): array
+    {
         $mesurements = [];
         foreach ($mesurementDocs as $doc) {
             $mesurements[] = $this->mapDocumentToEntity($doc);
         }
+
         return $mesurements;
     }
 
     /**
      * @param BSONDocument|array<string, mixed> $doc
+     *
      * @throws DateMalformedStringException
      */
-    protected function mapDocumentToEntity(array|object $doc): Measurement {
+    protected function mapDocumentToEntity(array|object $doc): Measurement
+    {
         $data = $this->documentToArray($doc);
 
         $reportedRaw = (string) ($data['reportedAt'] ?? '');
         $reported = DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $reportedRaw)
             ?: new DateTimeImmutable($reportedRaw);
 
+        $wsRaw = $data['weatherStationId'] ?? $data['stationId'] ?? '';
+
         return new Measurement(
             new MeasurementId((string) $data['_id']),
-            new StationId((string) $data['stationId']),
+            new WeatherStationId((string) $wsRaw),
             (float) $data['temperatureCelsius'],
             new Humidity((float) $data['humidityPercent']),
             (float) $data['pressureHpa'],
@@ -156,7 +177,8 @@ final class MongoMeasurementRepository extends MongoPersistence
      * @param  BSONDocument|array<string, mixed>  $doc
      * @return array<string, mixed>
      */
-    private function documentToArray(array|object $doc): array {
+    private function documentToArray(array|object $doc): array
+    {
         if (is_array($doc)) {
             return $doc;
         }

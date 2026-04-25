@@ -12,14 +12,14 @@ Route::get('/users/{id}', [UserController::class, 'show']);
 Route::patch('/users/{id}', [UserController::class, 'update']);
 Route::delete('/users/{id}', [UserController::class, 'destroy']);
 Route::post('/users/{id}/subscriptions', [UserController::class, 'subscribe']);
-Route::delete('/users/{id}/subscriptions/{stationId}', [UserController::class, 'unsubscribe']);
+Route::delete('/users/{id}/subscriptions/{weatherStationId}', [UserController::class, 'unsubscribe']);
 
-Route::post('/stations', [WeatherStationController::class, 'store']);
-Route::get('/stations/{id}', [WeatherStationController::class, 'show']);
-Route::patch('/stations/{id}', [WeatherStationController::class, 'update']);
-Route::delete('/stations/{id}', [WeatherStationController::class, 'destroy']);
+Route::post('/weather-stations', [WeatherStationController::class, 'store']);
+Route::get('/weather-stations/{id}', [WeatherStationController::class, 'show']);
+Route::patch('/weather-stations/{id}', [WeatherStationController::class, 'update']);
+Route::delete('/weather-stations/{id}', [WeatherStationController::class, 'destroy']);
 
-Route::get('/stations/{stationId}/measurements', [MeasurementController::class, 'indexByStation']);
+Route::get('/weather-stations/{weatherStationId}/measurements', [MeasurementController::class, 'indexByWeatherStation']);
 Route::post('/measurements', [MeasurementController::class, 'store']);
 Route::get('/measurements', [MeasurementController::class, 'index']);
 Route::get('/measurements/{id}', [MeasurementController::class, 'show']);

@@ -7,7 +7,7 @@ namespace WeatherFlow\Domain\Repository;
 use WeatherFlow\Domain\Entity\Measurement;
 use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\ValueObject\Id;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 interface MeasurementRepository
 {
@@ -18,7 +18,7 @@ interface MeasurementRepository
     /**
      * @return list<Measurement>
      */
-    public function findByStationId(StationId $stationId): array;
+    public function findByWeatherStationId(WeatherStationId $weatherStationId): array;
 
     /**
      * @return list<Measurement>

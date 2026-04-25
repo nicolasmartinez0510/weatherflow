@@ -9,14 +9,14 @@ use WeatherFlow\Domain\Repository\MeasurementRepository;
 use WeatherFlow\Domain\Repository\WeatherStationRepository;
 use WeatherFlow\Domain\ValueObject\Id;
 use WeatherFlow\Domain\ValueObject\MeasurementId;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 final class InMemoryMeasurementRepository implements MeasurementRepository
 {
     /** @var array<string, Measurement> */
     private array $measurements = [];
 
-    public function __construct(private readonly ?WeatherStationRepository $stations = null) {}
+    public function __construct(private readonly ?WeatherStationRepository $weatherStations = null) {}
 
     public function save(Measurement $measurement): void
     {
@@ -28,11 +28,11 @@ final class InMemoryMeasurementRepository implements MeasurementRepository
         return $this->measurements[$id->value] ?? null;
     }
 
-    public function findByStationId(StationId $stationId): array
+    public function findByWeatherStationId(WeatherStationId $weatherStationId): array
     {
         $list = array_values(array_filter(
             $this->measurements,
-            static fn (Measurement $m) => $m->stationId()->value === $stationId->value,
+            static fn (Measurement $m) => $m->weatherStationId()->value === $weatherStationId->value,
         ));
 
         usort(
@@ -67,11 +67,11 @@ final class InMemoryMeasurementRepository implements MeasurementRepository
                 }
 
                 if ($stationNameNeedle !== null) {
-                    if ($this->stations === null) {
+                    if ($this->weatherStations === null) {
                         return false;
                     }
 
-                    $station = $this->stations->findById($measurement->stationId());
+                    $station = $this->weatherStations->findById($measurement->weatherStationId());
                     if ($station === null) {
                         return false;
                     }

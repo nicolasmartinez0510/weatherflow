@@ -15,7 +15,7 @@ final class SubscriptionRequest extends ApiRequest {
     public function rules(): array
     {
         return [
-            'station_id' => ['required', 'string', 'min:1'],
+            'weather_station_id' => ['required', 'string', 'min:1'],
         ];
     }
 }

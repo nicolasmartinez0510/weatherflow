@@ -5,28 +5,29 @@ declare(strict_types=1);
 namespace WeatherFlow\Application\UseCase\User;
 
 use WeatherFlow\Domain\Entity\User;
-use WeatherFlow\Domain\ValueObject\StationId;
+use WeatherFlow\Domain\Entity\WeatherflowEntity;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 final readonly class UserResponse
 {
     /**
-     * @param  list<string>  $subscribedStationIds
+     * @param  list<string>  $subscribedWeatherStationIds
      */
     public function __construct(
         public string $id,
         public string $email,
         public string $name,
-        public array $subscribedStationIds,
+        public array $subscribedWeatherStationIds,
     ) {
     }
 
-    public static function fromEntity(User $user): self
+    public static function fromEntity(User|WeatherflowEntity $user): self
     {
         return new self(
             $user->id()->value,
             $user->email()->value,
             $user->name(),
-            array_map(static fn (StationId $id): string => $id->value, $user->subscribedStationIds()),
+            array_map(static fn (WeatherStationId $id): string => $id->value, $user->subscribedWeatherStationIds()),
         );
     }
 
@@ -39,7 +40,7 @@ final readonly class UserResponse
             'id' => $this->id,
             'email' => $this->email,
             'name' => $this->name,
-            'subscribed_station_ids' => $this->subscribedStationIds,
+            'subscribed_weather_station_ids' => $this->subscribedWeatherStationIds,
         ];
     }
 }

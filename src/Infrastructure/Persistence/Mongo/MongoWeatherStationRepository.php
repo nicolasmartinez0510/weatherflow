@@ -10,21 +10,24 @@ use WeatherFlow\Domain\Entity\WeatherflowEntity;
 use WeatherFlow\Domain\Entity\WeatherStation;
 use WeatherFlow\Domain\Repository\WeatherStationRepository;
 use WeatherFlow\Domain\ValueObject\Coordinates;
-use WeatherFlow\Domain\ValueObject\StationId;
-use WeatherFlow\Domain\ValueObject\StationStatus;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 use WeatherFlow\Domain\ValueObject\UserId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
 
 /**
- * @extends MongoPersistence<WeatherStation, StationId>
+ * @extends MongoPersistence<WeatherStation, WeatherStationId>
  */
-final class MongoWeatherStationRepository extends MongoPersistence implements WeatherStationRepository {
-
-    public function __construct(Client $client, string $databaseName, string $collectionName = 'stations') {
+final class MongoWeatherStationRepository extends MongoPersistence implements WeatherStationRepository
+{
+    public function __construct(Client $client, string $databaseName, string $collectionName = 'stations')
+    {
         parent::__construct($client, $databaseName, $collectionName);
     }
 
-    protected function getDocByEntity(WeatherStation|WeatherflowEntity $entity): array|object {
+    protected function getDocByEntity(WeatherStation|WeatherflowEntity $entity): array|object
+    {
         $coords = $entity->coordinates();
+
         return [
             '_id' => $entity->id()->value,
             'name' => $entity->name(),
@@ -39,14 +42,15 @@ final class MongoWeatherStationRepository extends MongoPersistence implements We
     /**
      * @param  BSONDocument|array<string, mixed>  $doc
      */
-    protected function mapDocumentToEntity(array|object $doc): WeatherStation {
+    protected function mapDocumentToEntity(array|object $doc): WeatherStation
+    {
         $data = $this->documentToArray($doc);
 
         $statusRaw = (string) ($data['status'] ?? 'active');
-        $status = StationStatus::tryFrom($statusRaw) ?? StationStatus::Active;
+        $status = WeatherStationStatus::tryFrom($statusRaw) ?? WeatherStationStatus::Active;
 
         return new WeatherStation(
-            new StationId((string) $data['_id']),
+            new WeatherStationId((string) $data['_id']),
             (string) $data['name'],
             new Coordinates((float) $data['latitude'], (float) $data['longitude']),
             (string) $data['sensorModel'],
@@ -59,7 +63,8 @@ final class MongoWeatherStationRepository extends MongoPersistence implements We
      * @param  BSONDocument|array<string, mixed>  $doc
      * @return array<string, mixed>
      */
-    private function documentToArray(array|object $doc): array {
+    private function documentToArray(array|object $doc): array
+    {
         if (is_array($doc)) {
             return $doc;
         }
