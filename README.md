@@ -1,69 +1,144 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# WeatherFlow API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para gestion de usuarios, estaciones meteorologicas y mediciones, implementada con Laravel 13 y arquitectura hexagonal (dominio y casos de uso en `src/`, adaptadores HTTP e infraestructura en Laravel).
 
-## Folder structure (hexagonal)
+## Requisitos
 
-The application core lives under `src/` with the `WeatherFlow\` namespace:
+- PHP 8.3 o superior
+- Composer 2
+- MongoDB 7 (local o en Docker)
+- Extension `mongodb` de PHP habilitada
+- Node.js 20+ y npm (solo si queres compilar assets frontend)
+- Docker Desktop (opcional, para correr con Sail)
 
-- **Domain** — pure business rules (entities, value objects, domain services, repository interfaces). No Laravel or MongoDB imports.
-- **Application** — use cases and DTOs; orchestrates the domain via ports (interfaces).
-- **Infrastructure** — HTTP adapters, MongoDB persistence, and other framework or external details.
-- **Shared** — cross-cutting types and helpers used by multiple layers.
-
-Laravel’s `app/` layer wires configuration, HTTP kernel, and providers; `App\Providers\DomainServiceProvider` registers port-to-adapter bindings for the hexagon.
-
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Clonar e instalar
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repo-url>
+cd weatherflow
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## Configuracion de entorno (`.env`)
 
-## Contributing
+Variables importantes:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```dotenv
+APP_URL=http://localhost:8100
+MONGODB_URI=mongodb://mongodb:27017
+MONGODB_DATABASE=weatherflow
+L5_SWAGGER_BASE_PATH="${APP_URL}"
+```
 
-## Code of Conduct
+Notas:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Con Sail, el host de Mongo suele ser `mongodb`.
+- Si corres todo en tu host (sin Docker), usa por ejemplo `MONGODB_URI=mongodb://127.0.0.1:27017`.
+- La API de Laravel usa el prefijo `/api` (ejemplo: `http://localhost:8100/api/users`).
 
-## Security Vulnerabilities
+## Levantar el proyecto
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Opcion A: Laravel Sail (recomendada)
 
-## License
+```bash
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan config:clear
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Servicios relevantes en este proyecto:
+
+- App: `http://localhost:8100`
+- MongoDB: `mongodb://127.0.0.1:27017` (desde tu host)
+
+### Opcion B: PHP local (sin Sail)
+
+Asegurate de tener Mongo corriendo en la URI configurada y luego:
+
+```bash
+php artisan config:clear
+php artisan serve
+```
+
+Por defecto Laravel queda en `http://127.0.0.1:8000`.
+
+## Base de datos y migraciones
+
+El core de WeatherFlow persiste en Mongo (`users`, `stations`, `measurements`).
+
+Si ademas queres inicializar tablas SQL de soporte de Laravel (segun tu `DB_CONNECTION`), ejecuta:
+
+```bash
+php artisan migrate
+```
+
+Con Sail:
+
+```bash
+./vendor/bin/sail artisan migrate
+```
+
+## OpenAPI / Swagger
+
+Generar documentacion:
+
+```bash
+php artisan l5-swagger:generate
+```
+
+o usando el script de Composer:
+
+```bash
+composer docs:openapi
+```
+
+Con Sail:
+
+```bash
+./vendor/bin/sail artisan l5-swagger:generate
+```
+
+Swagger UI:
+
+- `GET /api/documentation`
+- Ejemplo con Sail: `http://localhost:8100/api/documentation`
+
+## Correr tests
+
+La suite incluye `Unit` y `Feature`. Para tests de integracion con Mongo, revisar `.env.testing` (`WEATHERFLOW_TEST_USE_MONGO=true` y `MONGODB_DATABASE=weatherflow-tests`).
+
+```bash
+php artisan test
+```
+
+o:
+
+```bash
+composer test
+```
+
+Con Sail:
+
+```bash
+./vendor/bin/sail artisan test
+```
+
+## Postman
+
+Hay una coleccion lista para importar:
+
+- `docs/postman/WeatherFlow.postman_collection.json`
+
+Configura la variable `baseUrl` segun tu entorno (`http://localhost:8100/api` con Sail o `http://127.0.0.1:8000/api` local).
+
+## Estructura del proyecto (hexagonal)
+
+El codigo de negocio vive bajo `src/` (`WeatherFlow\`):
+
+- `src/Domain`: entidades, value objects, servicios de dominio, puertos de repositorio.
+- `src/Application`: casos de uso.
+- `src/Infrastructure`: adaptadores de persistencia y otros detalles tecnicos.
+- `app/Http`: controladores y requests HTTP delgados.
+
+Los bindings de puertos a adaptadores se registran en `app/Providers/DomainServiceProvider.php`.

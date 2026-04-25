@@ -1,0 +1,353 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "WeatherFlow API",
+		"description": "API REST WeatherFlow (Laravel). Variable `baseUrl` por defecto: `http://localhost:8100/api`. Tras crear recursos, copiá los `id` devueltos a `userId`, `weatherStationId` y `measurementId`.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8100/api"
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "weatherStationId",
+			"value": ""
+		},
+		{
+			"key": "measurementId",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"name\": \"Ada Lovelace\"\n}"
+						},
+						"url": "{{baseUrl}}/users",
+						"description": "POST /users — body: `email`, `name`."
+					}
+				},
+				{
+					"name": "Get user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/users/{{userId}}",
+						"description": "GET /users/{id}"
+					}
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Ada L.\"\n}"
+						},
+						"url": "{{baseUrl}}/users/{{userId}}",
+						"description": "PATCH /users/{id} — al menos uno de `name` o `email`."
+					}
+				},
+				{
+					"name": "Delete user",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/users/{{userId}}",
+						"description": "DELETE /users/{id} — 204 sin cuerpo."
+					}
+				},
+				{
+					"name": "Subscribe to station",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"weather_station_id\": \"{{weatherStationId}}\"\n}"
+						},
+						"url": "{{baseUrl}}/users/{{userId}}/subscriptions",
+						"description": "POST /users/{id}/subscriptions — body: `weather_station_id`."
+					}
+				},
+				{
+					"name": "Unsubscribe from station",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/users/{{userId}}/subscriptions/{{weatherStationId}}",
+						"description": "DELETE /users/{id}/subscriptions/{weatherStationId}"
+					}
+				}
+			]
+		},
+		{
+			"name": "Stations",
+			"item": [
+				{
+					"name": "Create station",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"owner_id\": \"{{userId}}\",\n  \"name\": \"Estación Norte\",\n  \"latitude\": -34.6,\n  \"longitude\": -58.4,\n  \"sensor_model\": \"WF-2000\",\n  \"status\": \"active\"\n}"
+						},
+						"url": "{{baseUrl}}/weather-stations",
+						"description": "POST /weather-stations — `owner_id` debe existir. `status` opcional: `active` | `inactive`."
+					}
+				},
+				{
+					"name": "Get station",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/weather-stations/{{weatherStationId}}",
+						"description": "GET /weather-stations/{id}"
+					}
+				},
+				{
+					"name": "Update station",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Estación Norte (actualizada)\",\n  \"latitude\": -34.61,\n  \"longitude\": -58.41\n}"
+						},
+						"url": "{{baseUrl}}/weather-stations/{{weatherStationId}}",
+						"description": "PATCH /weather-stations/{id} — si mandás `latitude` o `longitude`, deben ir ambos."
+					}
+				},
+				{
+					"name": "Delete station",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/weather-stations/{{weatherStationId}}",
+						"description": "DELETE /weather-stations/{id} — 204 sin cuerpo."
+					}
+				}
+			]
+		},
+		{
+			"name": "Measurements",
+			"item": [
+				{
+					"name": "List measurements by station",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/weather-stations/{{weatherStationId}}/measurements",
+						"description": "GET /weather-stations/{weatherStationId}/measurements"
+					}
+				},
+				{
+					"name": "Create measurement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"weather_station_id\": \"{{weatherStationId}}\",\n  \"temperature\": 22.5,\n  \"humidity\": 65,\n  \"pressure\": 1013.25,\n  \"reported_at\": \"2026-04-14T12:00:00Z\"\n}"
+						},
+						"url": "{{baseUrl}}/measurements",
+						"description": "POST /measurements — `weather_station_id` debe existir. `reported_at` formato fecha ISO u otro válido para la regla `date` de Laravel."
+					}
+				},
+				{
+					"name": "List measurement history (filters)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/measurements?station_name=&min_temperature=&max_temperature=&alerts_only=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"measurements"
+							],
+							"query": [
+								{
+									"key": "station_name",
+									"value": "",
+									"description": "Filtrar por nombre de estación (opcional)."
+								},
+								{
+									"key": "min_temperature",
+									"value": "",
+									"description": "Temperatura mínima (opcional). Requiere min ≤ max si ambos están."
+								},
+								{
+									"key": "max_temperature",
+									"value": "",
+									"description": "Temperatura máxima (opcional)."
+								},
+								{
+									"key": "alerts_only",
+									"value": "false",
+									"description": "Solo mediciones con alerta (boolean)."
+								}
+							]
+						},
+						"description": "GET /measurements — query opcionales: `station_name`, `min_temperature`, `max_temperature`, `alerts_only`."
+					}
+				},
+				{
+					"name": "Get measurement",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/measurements/{{measurementId}}",
+						"description": "GET /measurements/{id}"
+					}
+				},
+				{
+					"name": "Update measurement",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"temperature\": 23.0,\n  \"humidity\": 60\n}"
+						},
+						"url": "{{baseUrl}}/measurements/{{measurementId}}",
+						"description": "PATCH /measurements/{id} — al menos uno de `temperature`, `humidity`, `pressure`, `reported_at`."
+					}
+				},
+				{
+					"name": "Delete measurement",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": "{{baseUrl}}/measurements/{{measurementId}}",
+						"description": "DELETE /measurements/{id} — 204 sin cuerpo."
+					}
+				}
+			]
+		}
+	]
+}
