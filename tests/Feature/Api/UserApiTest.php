@@ -69,16 +69,25 @@ final class UserApiTest extends TestCase
 
     public function test_subscribe_and_unsubscribe(): void
     {
-        $id = $this->postJson('/api/users', [
+        $ownerId = $this->postJson('/api/users', [
             'email' => 'bob@example.com',
             'name' => 'Bob',
         ])->json('id');
 
-        $this->postJson('/api/users/'.$id.'/subscriptions', [
-            'weather_station_id' => 'st-1',
-        ])->assertOk()->assertJsonPath('subscribed_weather_station_ids', ['st-1']);
+        $stationId = $this->postJson('/api/weather-stations', [
+            'owner_id' => $ownerId,
+            'name' => 'Station 1',
+            'latitude' => -34.6,
+            'longitude' => -58.4,
+            'sensor_model' => 'BME280',
+            'status' => 'active',
+        ])->json('id');
 
-        $this->deleteJson('/api/users/'.$id.'/subscriptions/st-1')
+        $this->postJson('/api/users/'.$ownerId.'/subscriptions', [
+            'weather_station_id' => $stationId,
+        ])->assertOk()->assertJsonPath('subscribed_weather_station_ids', [$stationId]);
+
+        $this->deleteJson('/api/users/'.$ownerId.'/subscriptions/'.$stationId)
             ->assertOk()
             ->assertJsonPath('subscribed_weather_station_ids', []);
     }
@@ -185,7 +194,19 @@ final class UserApiTest extends TestCase
     public function test_subscribe_returns_404_when_user_does_not_exist(): void
     {
         $this->postJson('/api/users/unknown-user-id/subscriptions', [
-            'weather_station_id' => 'st-1',
+            'weather_station_id' => 'station-id',
+        ])->assertNotFound();
+    }
+
+    public function test_subscribe_returns_404_when_station_does_not_exist(): void
+    {
+        $id = $this->postJson('/api/users', [
+            'email' => 'station404@example.com',
+            'name' => 'Station404',
+        ])->json('id');
+
+        $this->postJson('/api/users/'.$id.'/subscriptions', [
+            'weather_station_id' => 'missing-station',
         ])->assertNotFound();
     }
 

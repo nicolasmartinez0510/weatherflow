@@ -10,6 +10,7 @@ use App\Http\Requests\User\SubscriptionRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\User\CreateUserUseCase;
 use WeatherFlow\Application\UseCase\User\DeleteUserUseCase;
@@ -89,6 +90,8 @@ final class UserController extends Controller
     {
         try {
             $response = $this->subscribeUser->execute($id, (string) $request->validated('weather_station_id'));
+        } catch (StationNotFoundException) {
+            return response()->json(['message' => 'Weather Station not found.'], Response::HTTP_NOT_FOUND);
         } catch (UserNotFoundException) {
             return response()->json(['message' => 'User not found.'], Response::HTTP_NOT_FOUND);
         }

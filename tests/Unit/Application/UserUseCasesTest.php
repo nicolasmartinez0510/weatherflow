@@ -7,6 +7,8 @@ namespace Tests\Unit\Application;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\InMemoryUserRepository;
+use Tests\Support\InMemoryWeatherStationRepository;
+use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\User\CreateUserUseCase;
 use WeatherFlow\Application\UseCase\User\DeleteUserUseCase;
@@ -16,17 +18,23 @@ use WeatherFlow\Application\UseCase\User\SubscribeUserToWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UpdateUserUseCase;
 use WeatherFlow\Domain\Entity\User;
+use WeatherFlow\Domain\Entity\WeatherStation;
+use WeatherFlow\Domain\ValueObject\Coordinates;
 use WeatherFlow\Domain\ValueObject\Email;
 use WeatherFlow\Domain\ValueObject\UserId;
+use WeatherFlow\Domain\ValueObject\WeatherStationId;
+use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 
 final class UserUseCasesTest extends TestCase
 {
     private InMemoryUserRepository $users;
+    private InMemoryWeatherStationRepository $weatherStations;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->users = new InMemoryUserRepository;
+        $this->weatherStations = new InMemoryWeatherStationRepository;
     }
 
     public function test_create_and_get_user(): void
@@ -142,7 +150,7 @@ final class UserUseCasesTest extends TestCase
 
     public function test_subscribe_throws_when_user_missing(): void
     {
-        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users);
+        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users, $this->weatherStations);
 
         $this->expectException(UserNotFoundException::class);
         $subscribe->execute('missing', 'st-1');
@@ -164,13 +172,36 @@ final class UserUseCasesTest extends TestCase
             'Ada',
         ));
 
-        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users);
+        $this->weatherStations->save(new WeatherStation(
+            new WeatherStationId('st-42'),
+            'Station 42',
+            new Coordinates(-34.6, -58.4),
+            'BME280',
+            WeatherStationStatus::Active,
+            new UserId('u-1'),
+        ));
+
+        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users, $this->weatherStations);
         $afterSub = $subscribe->execute('u-1', 'st-42');
         $this->assertSame(['st-42'], $afterSub->subscribedWeatherStationIds);
 
         $unsubscribe = new UnsubscribeUserFromWeatherStationUseCase($this->users);
         $afterUnsub = $unsubscribe->execute('u-1', 'st-42');
         $this->assertSame([], $afterUnsub->subscribedWeatherStationIds);
+    }
+
+    public function test_subscribe_throws_when_station_missing(): void
+    {
+        $this->users->save(new User(
+            new UserId('u-1'),
+            new Email('a@b.com'),
+            'Ada',
+        ));
+
+        $subscribe = new SubscribeUserToWeatherStationUseCase($this->users, $this->weatherStations);
+
+        $this->expectException(StationNotFoundException::class);
+        $subscribe->execute('u-1', 'st-missing');
     }
 
     public function test_delete_user(): void
