@@ -14,5 +14,10 @@ interface WeatherStationRepository
 
     public function findById(Id $id): ?WeatherflowEntity;
 
+    /**
+     * @return list<WeatherStation>
+     */
+    public function findAll(): array;
+
     public function delete(Id $id): void;
 }

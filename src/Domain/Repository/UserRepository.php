@@ -14,5 +14,10 @@ interface UserRepository
 
     public function findById(Id $id): ?WeatherflowEntity;
 
+    /**
+     * @return list<User>
+     */
+    public function findAll(): array;
+
     public function delete(Id $id): void;
 }

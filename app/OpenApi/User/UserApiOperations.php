@@ -11,11 +11,28 @@ use OpenApi\Attributes as OA;
  */
 final class UserApiOperations
 {
+    #[OA\Get(
+        path: '/api/users',
+        operationId: 'usersIndex',
+        summary: 'Listar usuarios',
+        tags: ['Users'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'OK',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/UserResponse'),
+                ),
+            ),
+        ]
+    )]
+    public function usersIndex(): void {}
+
     #[OA\Post(
         path: '/api/users',
         operationId: 'usersStore',
         summary: 'Crear usuario',
-        tags: ['Users'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -26,6 +43,7 @@ final class UserApiOperations
                 ]
             )
         ),
+        tags: ['Users'],
         responses: [
             new OA\Response(
                 response: 201,
@@ -58,7 +76,10 @@ final class UserApiOperations
             new OA\Response(
                 response: 404,
                 description: 'No encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'User not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
         ]
     )]
@@ -68,10 +89,6 @@ final class UserApiOperations
         path: '/api/users/{id}',
         operationId: 'usersUpdate',
         summary: 'Actualizar usuario (al menos email o name)',
-        tags: ['Users'],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
-        ],
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 properties: [
@@ -80,6 +97,10 @@ final class UserApiOperations
                 ]
             )
         ),
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -89,7 +110,10 @@ final class UserApiOperations
             new OA\Response(
                 response: 404,
                 description: 'No encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'User not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
             new OA\Response(
                 response: 422,
@@ -118,10 +142,6 @@ final class UserApiOperations
         path: '/api/users/{id}/subscriptions',
         operationId: 'usersSubscribe',
         summary: 'Suscribir usuario a una estación',
-        tags: ['Users'],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
-        ],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -131,6 +151,10 @@ final class UserApiOperations
                 ]
             )
         ),
+        tags: ['Users'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -140,7 +164,10 @@ final class UserApiOperations
             new OA\Response(
                 response: 404,
                 description: 'Usuario no encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'User not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
             new OA\Response(
                 response: 422,
@@ -169,7 +196,10 @@ final class UserApiOperations
             new OA\Response(
                 response: 404,
                 description: 'Usuario no encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'User not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
         ]
     )]

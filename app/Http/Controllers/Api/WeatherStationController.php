@@ -8,13 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Station\StoreWeatherStationRequest;
 use App\Http\Requests\Station\UpdateWeatherStationRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response;
 use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\WeatherStation\CreateWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\WeatherStation\DeleteWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\WeatherStation\GetWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\ListWeatherStationsUseCase;
 use WeatherFlow\Application\UseCase\WeatherStation\UpdateWeatherStationUseCase;
 use WeatherFlow\Domain\ValueObject\WeatherStationStatus;
 
@@ -22,6 +23,7 @@ final class WeatherStationController extends Controller
 {
     public function __construct(
         private readonly CreateWeatherStationUseCase $createStation,
+        private readonly ListWeatherStationsUseCase $listStations,
         private readonly GetWeatherStationUseCase $getStation,
         private readonly UpdateWeatherStationUseCase $updateStation,
         private readonly DeleteWeatherStationUseCase $deleteStation,
@@ -48,12 +50,22 @@ final class WeatherStationController extends Controller
         return response()->json($response->toArray(), Response::HTTP_CREATED);
     }
 
+    public function index(): JsonResponse
+    {
+        $items = $this->listStations->execute();
+
+        return response()->json(array_map(
+            static fn ($r) => $r->toArray(),
+            $items,
+        ));
+    }
+
     public function show(string $id): JsonResponse
     {
         try {
             $response = $this->getStation->execute($id);
         } catch (StationNotFoundException) {
-            return response()->json(['message' => 'Station not found.'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Weather Station not found.'], Response::HTTP_NOT_FOUND);
         }
 
         return response()->json($response->toArray());
@@ -78,7 +90,7 @@ final class WeatherStationController extends Controller
                 $status,
             );
         } catch (StationNotFoundException) {
-            return response()->json(['message' => 'Station not found.'], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Weather Station not found.'], Response::HTTP_NOT_FOUND);
         } catch (InvalidArgumentException $e) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
@@ -86,10 +98,10 @@ final class WeatherStationController extends Controller
         return response()->json($response->toArray());
     }
 
-    public function destroy(string $id): Response
+    public function destroy(string $id): JsonResponse
     {
         $this->deleteStation->execute($id);
 
-        return response()->noContent();
+        return response()->json("Weather Station deleted successfully.", Response::HTTP_NO_CONTENT);
     }
 }

@@ -64,6 +64,21 @@ final class MongoUserRepository extends MongoPersistence implements UserReposito
     }
 
     /**
+     * @return list<User>
+     */
+    public function findAll(): array
+    {
+        $docs = $this->collection->find([], ['sort' => ['name' => 1, '_id' => 1]]);
+        $users = [];
+
+        foreach ($docs as $doc) {
+            $users[] = $this->mapDocumentToEntity($doc);
+        }
+
+        return $users;
+    }
+
+    /**
      * @param  BSONDocument|array<string, mixed>  $doc
      * @return array<string, mixed>
      */

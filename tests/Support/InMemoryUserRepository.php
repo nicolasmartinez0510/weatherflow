@@ -24,6 +24,11 @@ final class InMemoryUserRepository implements UserRepository
         return $this->users[$id->value] ?? null;
     }
 
+    public function findAll(): array
+    {
+        return array_values($this->users);
+    }
+
     public function delete(Id $id): void
     {
         unset($this->users[$id->value]);

@@ -11,8 +11,8 @@ use App\Http\Requests\Measurement\UpdateMeasurementRequest;
 use DateMalformedStringException;
 use DateTimeImmutable;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response;
 use WeatherFlow\Application\Exception\MeasurementNotFoundException;
 use WeatherFlow\Application\Exception\StationNotFoundException;
 use WeatherFlow\Application\UseCase\Measurement\CreateMeasurementUseCase;
@@ -113,11 +113,11 @@ final class MeasurementController extends Controller
         return response()->json($response->toArray());
     }
 
-    public function destroy(string $id): Response
+    public function destroy(string $id): JsonResponse
     {
         $this->deleteMeasurement->execute($id);
 
-        return response()->noContent();
+        return response()->json("Measurement deleted successfully.", Response::HTTP_NO_CONTENT);
     }
 
     public function indexByWeatherStation(string $weatherStationId): JsonResponse

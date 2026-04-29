@@ -11,7 +11,7 @@ final class MeasurementApiOperations
     #[OA\Get(
         path: '/api/weather-stations/{weatherStationId}/measurements',
         operationId: 'measurementsIndexByWeatherStation',
-        summary: 'Listar mediciones de una estaci?n',
+        summary: 'Listar mediciones de una estación',
         tags: ['Measurements'],
         parameters: [
             new OA\Parameter(name: 'weatherStationId', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
@@ -27,8 +27,11 @@ final class MeasurementApiOperations
             ),
             new OA\Response(
                 response: 404,
-                description: 'Estaci?n no encontrada',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                description: 'Estación no encontrada',
+                content: new OA\JsonContent(
+                    example: ['message' => 'Weather station not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
         ]
     )]
@@ -37,8 +40,7 @@ final class MeasurementApiOperations
     #[OA\Post(
         path: '/api/measurements',
         operationId: 'measurementsStore',
-        summary: 'Crear medici?n (eval?a alertas)',
-        tags: ['Measurements'],
+        summary: 'Crear medición (evalúa alertas)',
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -52,6 +54,7 @@ final class MeasurementApiOperations
                 ]
             )
         ),
+        tags: ['Measurements'],
         responses: [
             new OA\Response(
                 response: 201,
@@ -60,12 +63,15 @@ final class MeasurementApiOperations
             ),
             new OA\Response(
                 response: 404,
-                description: 'Estaci?n no encontrada',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                description: 'Estación no encontrada',
+                content: new OA\JsonContent(
+                    example: ['message' => 'Weather station not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
             new OA\Response(
                 response: 422,
-                description: 'Validaci?n',
+                description: 'Validación',
                 content: new OA\JsonContent(ref: '#/components/schemas/ValidationError'),
             ),
         ]
@@ -80,10 +86,10 @@ final class MeasurementApiOperations
         parameters: [
             new OA\Parameter(
                 name: 'station_name',
+                description: 'Filtrar por nombre de estación (join con colección stations)',
                 in: 'query',
                 required: false,
                 schema: new OA\Schema(type: 'string', minLength: 1),
-                description: 'Filtrar por nombre de estaci?n (join con colecci?n stations)',
             ),
             new OA\Parameter(
                 name: 'min_temperature',
@@ -99,10 +105,10 @@ final class MeasurementApiOperations
             ),
             new OA\Parameter(
                 name: 'alerts_only',
+                description: 'Solo mediciones con alerta',
                 in: 'query',
                 required: false,
                 schema: new OA\Schema(type: 'boolean'),
-                description: 'Solo mediciones con alerta',
             ),
         ],
         responses: [
@@ -116,7 +122,7 @@ final class MeasurementApiOperations
             ),
             new OA\Response(
                 response: 422,
-                description: 'Validaci?n (p. ej. min_temperature > max_temperature)',
+                description: 'Validación (p. ej. min_temperature > max_temperature)',
                 content: new OA\JsonContent(ref: '#/components/schemas/ValidationError'),
             ),
         ]
@@ -126,7 +132,7 @@ final class MeasurementApiOperations
     #[OA\Get(
         path: '/api/measurements/{id}',
         operationId: 'measurementsShow',
-        summary: 'Obtener medici?n',
+        summary: 'Obtener medición',
         tags: ['Measurements'],
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
@@ -140,7 +146,10 @@ final class MeasurementApiOperations
             new OA\Response(
                 response: 404,
                 description: 'No encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'Measurement not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
         ]
     )]
@@ -149,11 +158,7 @@ final class MeasurementApiOperations
     #[OA\Patch(
         path: '/api/measurements/{id}',
         operationId: 'measurementsUpdate',
-        summary: 'Actualizar medici?n',
-        tags: ['Measurements'],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
-        ],
+        summary: 'Actualizar medición',
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 properties: [
@@ -164,6 +169,10 @@ final class MeasurementApiOperations
                 ]
             )
         ),
+        tags: ['Measurements'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -173,11 +182,14 @@ final class MeasurementApiOperations
             new OA\Response(
                 response: 404,
                 description: 'No encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'Measurement not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
             new OA\Response(
                 response: 422,
-                description: 'Validaci?n o reglas de negocio',
+                description: 'Validación o reglas de negocio',
                 content: new OA\JsonContent(ref: '#/components/schemas/ValidationError'),
             ),
         ]
@@ -187,7 +199,7 @@ final class MeasurementApiOperations
     #[OA\Delete(
         path: '/api/measurements/{id}',
         operationId: 'measurementsDestroy',
-        summary: 'Eliminar medici?n',
+        summary: 'Eliminar medición',
         tags: ['Measurements'],
         parameters: [
             new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),

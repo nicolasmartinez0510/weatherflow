@@ -8,6 +8,59 @@ use Tests\TestCase;
 
 final class WeatherStationApiTest extends TestCase
 {
+    public function test_index_returns_empty_list_when_no_weather_stations(): void
+    {
+        $this->getJson('/api/weather-stations')
+            ->assertOk()
+            ->assertExactJson([]);
+    }
+
+    public function test_index_returns_all_weather_stations(): void
+    {
+        $ownerId = $this->postJson('/api/users', [
+            'email' => 'stations-index-owner@example.com',
+            'name' => 'Owner',
+        ])->json('id');
+
+        $first = $this->postJson('/api/weather-stations', [
+            'owner_id' => $ownerId,
+            'name' => 'Station One',
+            'latitude' => -34.5,
+            'longitude' => -58.4,
+            'sensor_model' => 'S1',
+        ])->json('id');
+        $second = $this->postJson('/api/weather-stations', [
+            'owner_id' => $ownerId,
+            'name' => 'Station Two',
+            'latitude' => -33.0,
+            'longitude' => -57.0,
+            'sensor_model' => 'S2',
+            'status' => 'inactive',
+        ])->json('id');
+
+        $response = $this->getJson('/api/weather-stations');
+
+        $response->assertOk()->assertJsonCount(2);
+        $response->assertJsonFragment([
+            'id' => $first,
+            'name' => 'Station One',
+            'latitude' => -34.5,
+            'longitude' => -58.4,
+            'sensor_model' => 'S1',
+            'status' => 'active',
+            'owner_id' => $ownerId,
+        ]);
+        $response->assertJsonFragment([
+            'id' => $second,
+            'name' => 'Station Two',
+            'latitude' => -33.0,
+            'longitude' => -57.0,
+            'sensor_model' => 'S2',
+            'status' => 'inactive',
+            'owner_id' => $ownerId,
+        ]);
+    }
+
     public function test_create_and_show_weather_station(): void
     {
         $ownerId = $this->postJson('/api/users', [
