@@ -11,6 +11,7 @@ use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\User\CreateUserUseCase;
 use WeatherFlow\Application\UseCase\User\DeleteUserUseCase;
 use WeatherFlow\Application\UseCase\User\GetUserUseCase;
+use WeatherFlow\Application\UseCase\User\ListUsersUseCase;
 use WeatherFlow\Application\UseCase\User\SubscribeUserToWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UpdateUserUseCase;
@@ -48,6 +49,27 @@ final class UserUseCasesTest extends TestCase
 
         $this->expectException(UserNotFoundException::class);
         $get->execute('missing-id');
+    }
+
+    public function test_list_users_returns_all_users(): void
+    {
+        $this->users->save(new User(
+            new UserId('u-1'),
+            new Email('a@example.com'),
+            'A',
+        ));
+        $this->users->save(new User(
+            new UserId('u-2'),
+            new Email('b@example.com'),
+            'B',
+        ));
+
+        $list = new ListUsersUseCase($this->users);
+        $items = $list->execute();
+
+        $this->assertCount(2, $items);
+        $this->assertSame('u-1', $items[0]->id);
+        $this->assertSame('u-2', $items[1]->id);
     }
 
     public function test_update_user_name_and_email(): void

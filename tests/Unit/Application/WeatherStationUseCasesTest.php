@@ -13,6 +13,7 @@ use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\WeatherStation\CreateWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\WeatherStation\DeleteWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\WeatherStation\GetWeatherStationUseCase;
+use WeatherFlow\Application\UseCase\WeatherStation\ListWeatherStationsUseCase;
 use WeatherFlow\Application\UseCase\WeatherStation\UpdateWeatherStationUseCase;
 use WeatherFlow\Domain\Entity\User;
 use WeatherFlow\Domain\Entity\WeatherStation;
@@ -87,6 +88,33 @@ final class WeatherStationUseCasesTest extends TestCase
 
         $this->expectException(StationNotFoundException::class);
         $get->execute('missing-id');
+    }
+
+    public function test_list_weather_stations_returns_all_weather_stations(): void
+    {
+        $this->stations->save(new WeatherStation(
+            new WeatherStationId('st-1'),
+            'One',
+            new Coordinates(1.0, 2.0),
+            'A',
+            WeatherStationStatus::Active,
+            new UserId('u-1'),
+        ));
+        $this->stations->save(new WeatherStation(
+            new WeatherStationId('st-2'),
+            'Two',
+            new Coordinates(3.0, 4.0),
+            'B',
+            WeatherStationStatus::Inactive,
+            new UserId('u-1'),
+        ));
+
+        $list = new ListWeatherStationsUseCase($this->stations);
+        $items = $list->execute();
+
+        $this->assertCount(2, $items);
+        $this->assertSame('st-1', $items[0]->id);
+        $this->assertSame('st-2', $items[1]->id);
     }
 
     public function test_update_throws_when_weather_station_missing(): void

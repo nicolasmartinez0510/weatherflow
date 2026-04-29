@@ -60,6 +60,21 @@ final class MongoWeatherStationRepository extends MongoPersistence implements We
     }
 
     /**
+     * @return list<WeatherStation>
+     */
+    public function findAll(): array
+    {
+        $docs = $this->collection->find([], ['sort' => ['name' => 1, '_id' => 1]]);
+        $stations = [];
+
+        foreach ($docs as $doc) {
+            $stations[] = $this->mapDocumentToEntity($doc);
+        }
+
+        return $stations;
+    }
+
+    /**
      * @param  BSONDocument|array<string, mixed>  $doc
      * @return array<string, mixed>
      */

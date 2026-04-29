@@ -24,6 +24,11 @@ final class InMemoryWeatherStationRepository implements WeatherStationRepository
         return $this->weatherStations[$id->value] ?? null;
     }
 
+    public function findAll(): array
+    {
+        return array_values($this->weatherStations);
+    }
+
     public function delete(Id $id): void
     {
         unset($this->weatherStations[$id->value]);

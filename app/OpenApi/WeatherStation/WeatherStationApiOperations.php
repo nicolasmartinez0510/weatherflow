@@ -8,11 +8,28 @@ use OpenApi\Attributes as OA;
 
 final class WeatherStationApiOperations
 {
+    #[OA\Get(
+        path: '/api/weather-stations',
+        operationId: 'stationsIndex',
+        summary: 'Listar estaciones',
+        tags: ['Weather Stations'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'OK',
+                content: new OA\JsonContent(
+                    type: 'array',
+                    items: new OA\Items(ref: '#/components/schemas/WeatherStationResponse'),
+                ),
+            ),
+        ]
+    )]
+    public function stationsIndex(): void {}
+
     #[OA\Post(
         path: '/api/weather-stations',
         operationId: 'stationsStore',
         summary: 'Crear estación',
-        tags: ['Weather Stations'],
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -27,6 +44,7 @@ final class WeatherStationApiOperations
                 ]
             )
         ),
+        tags: ['Weather Stations'],
         responses: [
             new OA\Response(
                 response: 201,
@@ -36,7 +54,10 @@ final class WeatherStationApiOperations
             new OA\Response(
                 response: 404,
                 description: 'Dueño (usuario) no encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'Owner user not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
             new OA\Response(
                 response: 422,
@@ -64,7 +85,10 @@ final class WeatherStationApiOperations
             new OA\Response(
                 response: 404,
                 description: 'No encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'Weather station not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
         ]
     )]
@@ -74,10 +98,6 @@ final class WeatherStationApiOperations
         path: '/api/weather-stations/{id}',
         operationId: 'stationsUpdate',
         summary: 'Actualizar estación (lat/lon en pareja)',
-        tags: ['Weather Stations'],
-        parameters: [
-            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
-        ],
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 properties: [
@@ -89,6 +109,10 @@ final class WeatherStationApiOperations
                 ]
             )
         ),
+        tags: ['Weather Stations'],
+        parameters: [
+            new OA\Parameter(name: 'id', in: 'path', required: true, schema: new OA\Schema(type: 'string')),
+        ],
         responses: [
             new OA\Response(
                 response: 200,
@@ -98,7 +122,10 @@ final class WeatherStationApiOperations
             new OA\Response(
                 response: 404,
                 description: 'No encontrado',
-                content: new OA\JsonContent(ref: '#/components/schemas/MessageError'),
+                content: new OA\JsonContent(
+                    example: ['message' => 'Weather station not found.'],
+                    allOf: [new OA\Schema(ref: '#/components/schemas/MessageError')],
+                ),
             ),
             new OA\Response(
                 response: 422,

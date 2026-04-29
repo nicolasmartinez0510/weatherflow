@@ -9,11 +9,12 @@ use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\SubscriptionRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response;
 use WeatherFlow\Application\Exception\UserNotFoundException;
 use WeatherFlow\Application\UseCase\User\CreateUserUseCase;
 use WeatherFlow\Application\UseCase\User\DeleteUserUseCase;
 use WeatherFlow\Application\UseCase\User\GetUserUseCase;
+use WeatherFlow\Application\UseCase\User\ListUsersUseCase;
 use WeatherFlow\Application\UseCase\User\SubscribeUserToWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UnsubscribeUserFromWeatherStationUseCase;
 use WeatherFlow\Application\UseCase\User\UpdateUserUseCase;
@@ -22,6 +23,7 @@ final class UserController extends Controller
 {
     public function __construct(
         private readonly CreateUserUseCase $createUser,
+        private readonly ListUsersUseCase $listUsers,
         private readonly GetUserUseCase $getUser,
         private readonly UpdateUserUseCase $updateUser,
         private readonly DeleteUserUseCase $deleteUser,
@@ -38,6 +40,16 @@ final class UserController extends Controller
         );
 
         return response()->json($response->toArray(), Response::HTTP_CREATED);
+    }
+
+    public function index(): JsonResponse
+    {
+        $items = $this->listUsers->execute();
+
+        return response()->json(array_map(
+            static fn ($r) => $r->toArray(),
+            $items,
+        ));
     }
 
     public function show(string $id): JsonResponse
@@ -66,11 +78,11 @@ final class UserController extends Controller
         return response()->json($response->toArray());
     }
 
-    public function destroy(string $id): Response
+    public function destroy(string $id): JsonResponse
     {
         $this->deleteUser->execute($id);
 
-        return response()->noContent();
+        return response()->json('User deleted successfully.', Response::HTTP_NO_CONTENT);
     }
 
     public function subscribe(SubscriptionRequest $request, string $id): JsonResponse

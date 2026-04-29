@@ -8,6 +8,41 @@ use Tests\TestCase;
 
 final class UserApiTest extends TestCase
 {
+    public function test_index_returns_empty_list_when_no_users(): void
+    {
+        $this->getJson('/api/users')
+            ->assertOk()
+            ->assertExactJson([]);
+    }
+
+    public function test_index_returns_all_users(): void
+    {
+        $first = $this->postJson('/api/users', [
+            'email' => 'first@example.com',
+            'name' => 'First',
+        ])->json('id');
+        $second = $this->postJson('/api/users', [
+            'email' => 'second@example.com',
+            'name' => 'Second',
+        ])->json('id');
+
+        $response = $this->getJson('/api/users');
+
+        $response->assertOk()->assertJsonCount(2);
+        $response->assertJsonFragment([
+            'id' => $first,
+            'email' => 'first@example.com',
+            'name' => 'First',
+            'subscribed_weather_station_ids' => [],
+        ]);
+        $response->assertJsonFragment([
+            'id' => $second,
+            'email' => 'second@example.com',
+            'name' => 'Second',
+            'subscribed_weather_station_ids' => [],
+        ]);
+    }
+
     public function test_create_and_show_user(): void
     {
         $create = $this->postJson('/api/users', [
